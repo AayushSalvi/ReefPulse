@@ -1,0 +1,30 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Environment
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Build / reports
+dist/
+build/
+coverage/
+htmlcov/
+
+# Data / local artifacts
+data/
+tmp/
+logs/
+*.sqlite3
