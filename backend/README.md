@@ -11,3 +11,7 @@ This backend scaffold follows the ReefPulse proposal:
 - `repositories/` database / cache access
 
 The starting assumption is Python + FastAPI because the proposal leans heavily on Python data and ML tooling.
+
+## iNaturalist fish tool (Lambda-ready)
+
+The standalone package `inaturalist_usa_fish/` (same layout as the DataHacks prototype) lives next to `app/`. It provides `fetch_fish_near`, a CLI entrypoint pattern, and `lambda_handler` for API Gateway. SAM deploy lives under `../infra/aws/inaturalist-fish-lambda/` (see that folder’s README).

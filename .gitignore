@@ -1,6 +1,7 @@
 ﻿# Python
 __pycache__/
 *.py[cod]
+*.egg-info/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -22,6 +23,10 @@ dist/
 build/
 coverage/
 htmlcov/
+
+# AWS SAM
+.aws-sam/
+sam-deploy.log
 
 # Data / local artifacts
 data/

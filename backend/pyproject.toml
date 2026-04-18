@@ -1,4 +1,4 @@
-﻿[project]
+[project]
 name = "reefpulse-backend"
 version = "0.1.0"
 description = "Backend scaffold for the ReefPulse ocean intelligence platform"
@@ -22,3 +22,11 @@ dev = [
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*", "inaturalist_usa_fish*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
