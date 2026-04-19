@@ -42,7 +42,7 @@ def predict_fn(input_data: torch.Tensor, model_bundle: dict[str, object]) -> dic
         "latent_mean": mu.squeeze(0).tolist(),
         "latent_logvar": logvar.squeeze(0).tolist(),
         "feature_names": model_bundle["stats"]["feature_names"],
-        "threshold": model_bundle["stats"].get("baseline_threshold", 0.15),
+        "threshold": model_bundle["stats"].get("threshold", model_bundle["stats"].get("baseline_threshold", 0.15)),
         "driving_variables": per_feature_error.tolist(),
     }
 
