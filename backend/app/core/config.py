@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     model_b_local_artifact: Path = Path("backend/training/model_b/artifacts/model_b_stats.json")
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=Path(__file__).resolve().parents[2] / ".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
     )

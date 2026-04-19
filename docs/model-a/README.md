@@ -22,6 +22,24 @@ python -m app.ml.model_a build-windows \
 
 Produces `train.npz` and `val.npz` (gitignored).
 
+### Improving Model A (training defaults in repo)
+
+Training now uses by default:
+
+- **SmoothL1 (Huber) loss** (`--huber-delta 1.0`) so chlorophyll / oxygen spikes do not dominate MSE.
+- **Cosine LR schedule** and **AdamW weight decay** (`--weight-decay 0.02`).
+- **Early stopping** on validation MSE (`--early-stopping-patience 8`; set `0` to disable).
+- Slightly higher **dropout** in `PatchTSTMini`.
+
+Example (local or job):
+
+```bash
+python -m app.ml.model_a train --train-npz ./model_a_data/train.npz --val-npz ./model_a_data/val.npz \
+  --out ./model_A_forecaster.pt --epochs 40 --huber-delta 1.0 --early-stopping-patience 10
+```
+
+For SageMaker, add the same keys to hyperparameters, e.g. `huber-delta`, `early-stopping-patience`, `weight-decay`, or `disable-scheduler`=`true`.
+
 ---
 
 ## 2) Upload NPZ to S3 (same prefix)

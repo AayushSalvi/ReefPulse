@@ -47,6 +47,10 @@ def cmd_train(args: argparse.Namespace) -> None:
         device=args.device,
         max_train_samples=args.max_train_samples,
         max_val_samples=args.max_val_samples,
+        huber_delta=args.huber_delta,
+        early_stopping_patience=args.early_stopping_patience,
+        weight_decay=args.weight_decay,
+        use_scheduler=not args.no_scheduler,
     )
     print("saved:", args.out)
     print("metrics:", metrics)
@@ -72,6 +76,10 @@ def main() -> None:
     p_train.add_argument("--device", type=str, default=None)
     p_train.add_argument("--max-train-samples", type=int, default=None)
     p_train.add_argument("--max-val-samples", type=int, default=None)
+    p_train.add_argument("--huber-delta", type=float, default=1.0)
+    p_train.add_argument("--early-stopping-patience", type=int, default=8)
+    p_train.add_argument("--no-scheduler", action="store_true")
+    p_train.add_argument("--weight-decay", type=float, default=0.02)
     p_train.set_defaults(func=cmd_train)
 
     p_eval = sub.add_parser("eval", help="RMSE/MAE on val.npz (physical units)")
