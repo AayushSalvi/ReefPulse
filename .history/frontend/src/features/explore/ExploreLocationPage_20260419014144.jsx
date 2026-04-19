@@ -1,17 +1,12 @@
 /**
- * ReefPulse — Explore location: fishdeck species cards (ranked 1–10 from API when available)
+ * ReefPulse — Explore location: species as collectible-style cards (TCG-inspired)
  *
- * Route: `/explore/:locationId`  ·  Optional `?fishdeck=1` from sidebar CTA (cosmetic).
- * Strips legacy `?tab=` on load. Styles: `./explore-app.css`
+ * Route: `/explore/:locationId`  ·  Any legacy `?tab=` query is stripped on load.
+ * Styles: `./explore-app.css`
  */
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
-import { postSpeciesRank } from "../../api/speciesRank";
-import {
-  findLocation,
-  locationSpeciesDeck,
-  matchSpeciesQuery,
-} from "../../data/mockData";
+import { findLocation, locationSpeciesDeck } from "../../data/mockData";
 import "./explore-app.css";
 
 function tcgTypesFromName(name) {
@@ -66,21 +61,11 @@ const CARD_TONE_CYCLE = [
   { key: "lime", hex: "#D9F274" },
 ];
 
-function seasonFromMonth() {
-  const m = new Date().getMonth();
-  if (m < 2 || m === 11) return "winter";
-  if (m < 5) return "spring";
-  if (m < 8) return "summer";
-  return "fall";
-}
-
-function stateVectorFromLocation(loc) {
-  return [
-    Math.round(((loc.waterTempF - 32) * (5 / 9)) / 25 * 1000) / 1000,
-    Math.round((loc.waveFt / 8) * 1000) / 1000,
-    Math.round((loc.windMph / 35) * 1000) / 1000,
-    Math.round((loc.safetyIndex / 100) * 1000) / 1000,
-  ];
+function tcgRarity(index, total) {
+  if (total <= 1) return { label: "★ Rare" };
+  if (index === 0) return { label: "★ Rare" };
+  if (index >= total - 1) return { label: "Common" };
+  return { label: "Uncommon" };
 }
 
 function ExploreLocationPage() {
@@ -88,81 +73,10 @@ function ExploreLocationPage() {
   const [sp] = useSearchParams();
   const location = findLocation(locationId);
 
-  const [rankLoading, setRankLoading] = useState(true);
-  const [rankError, setRankError] = useState(null);
-  const [rankPayload, setRankPayload] = useState(null);
-
-  const fallbackDeck = useMemo(
+  const speciesDeck = useMemo(
     () => (location ? locationSpeciesDeck(location) : []),
     [location],
   );
-
-  useEffect(() => {
-    if (!location) return undefined;
-    let cancelled = false;
-    setRankLoading(true);
-    setRankError(null);
-    const body = {
-      location: location.name,
-      latitude: location.lat,
-      longitude: location.lng,
-      season: seasonFromMonth(),
-      state_vector: stateVectorFromLocation(location),
-      top_k: 10,
-      observed_date: new Date().toISOString().slice(0, 10),
-      image_count: 0,
-      temperature: Math.round(((location.waterTempF - 32) * (5 / 9)) * 10) / 10,
-      min_probability: 0,
-      rarity: "",
-    };
-    postSpeciesRank(body)
-      .then((data) => {
-        if (!cancelled) setRankPayload(data);
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setRankPayload(null);
-          setRankError(err instanceof Error ? err.message : "Rank API failed");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setRankLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [location]);
-
-  const deck = useMemo(() => {
-    if (!location) return [];
-    const preds = rankPayload?.predictions;
-    if (Array.isArray(preds) && preds.length) {
-      return preds.map((p, i) => {
-        const name = p.species || "Unknown";
-        const profile = matchSpeciesQuery(name);
-        return {
-          id: `rank-${location.id}-${i}-${name}`,
-          name,
-          rank: i + 1,
-          encounterPct: Math.round((p.encounter_probability ?? 0) * 1000) / 10,
-          profile,
-          tierLabel: (p.rarity || "common").replace(/^./, (c) => c.toUpperCase()),
-          apiLabel: p.label || "",
-          safety: p.safety || "",
-        };
-      });
-    }
-    return fallbackDeck.map((item, i) => ({
-      id: item.id,
-      name: item.name,
-      rank: i + 1,
-      encounterPct: tcgStats(item.name, i, location).encounter,
-      profile: item.profile,
-      tierLabel: null,
-      apiLabel: "",
-      safety: "",
-    }));
-  }, [location, rankPayload, fallbackDeck]);
 
   if (!location) {
     return <Navigate to="/explore" replace />;
@@ -177,8 +91,6 @@ function ExploreLocationPage() {
     );
   }
 
-  const fishdeckHint = sp.get("fishdeck") === "1";
-
   return (
     <div className="ex-location ex-location--tcg">
       <header className="ex-tcg-head">
@@ -189,61 +101,45 @@ function ExploreLocationPage() {
           <h1 className="ex-tcg-head__title">{location.name}</h1>
           <p className="ex-tcg-head__region">{location.region}</p>
         </div>
-        <p className="ex-tcg-head__tagline">
-          Fishdeck · ranked species {rankLoading ? "(loading…)" : "1–10"}
-        </p>
+        <p className="ex-tcg-head__tagline">Species roster · card-style demo</p>
       </header>
 
       <section
         className="ex-poke-stage ex-tab-panels--tcg"
-        aria-label="Ranked species cards for this beach"
+        aria-label="Species cards for this beach"
       >
-        {fishdeckHint ? (
-          <p className="ex-poke-stage__fishdeck" role="status">
-            Fishdeck opened from your map pin — ranks are for <strong>{location.name}</strong>.
-          </p>
-        ) : null}
         <p className="ex-poke-stage__lede">
-          {rankLoading
-            ? "Loading ranked encounters from the ReefPulse API…"
-            : rankError
-              ? `API unavailable (${rankError}). Showing local demo deck instead.`
-              : "Cards are ordered by encounter rank (#1 highest). Tap a card for Marine life."}
+          Each card is a local “encounter” hint — not a game stat. Tap a card
+          for the Marine life guide.
         </p>
         <div className="ex-poke-grid">
-          {deck.map((item, index) => {
+          {speciesDeck.map((item, index) => {
             const tone = CARD_TONE_CYCLE[index % CARD_TONE_CYCLE.length];
             const img = item.profile?.detailImage;
             const hint =
               item.profile?.hint ||
-              item.apiLabel ||
               "Seasonal on this coast — confirm IDs in the field and follow wildlife rules.";
             const types = tcgTypesFromName(item.name);
-            const { hp, swim } = tcgStats(item.name, index, location);
-            const encounter = item.encounterPct;
+            const { hp, encounter, swim } = tcgStats(
+              item.name,
+              index,
+              location,
+            );
+            const rarity = tcgRarity(index, speciesDeck.length);
             const dexLine = hint.length > 118 ? `${hint.slice(0, 116)}…` : hint;
-            const barLabel =
-              item.tierLabel && rankPayload
-                ? `Rank ${item.rank}/10 · ${item.tierLabel}`
-                : `Rank ${item.rank}/10`;
 
             return (
               <Link
                 key={item.id}
                 to="/marine-life"
                 className={`poke-card poke-card--tone-${tone.key}`}
-                aria-label={`${item.name}, rank ${item.rank} of 10`}
+                aria-label={`${item.name} — open Marine life`}
               >
                 <div
                   className={`poke-card__shine ${tone.key === "magenta" ? "poke-card__shine--on" : ""}`}
                   aria-hidden
                 />
                 <div className="poke-card__frame">
-                  <div className="poke-card__rank-strip" aria-hidden>
-                    <span className="poke-card__rank-hash">#</span>
-                    <span className="poke-card__rank-num">{item.rank}</span>
-                    <span className="poke-card__rank-of">/10</span>
-                  </div>
                   <div className="poke-card__top">
                     <span className="poke-card__name">{item.name}</span>
                     <span className="poke-card__hp-block">
@@ -274,7 +170,7 @@ function ExploreLocationPage() {
                   </div>
                   <p className="poke-card__dex">{dexLine}</p>
                   <div className="poke-card__bar">
-                    <span className="poke-card__rarity">{barLabel}</span>
+                    <span className="poke-card__rarity">{rarity.label}</span>
                     <span className="poke-card__retreat">
                       Retreat <span className="poke-card__energy" />{" "}
                       <span className="poke-card__energy" />
@@ -294,14 +190,10 @@ function ExploreLocationPage() {
                       <dd>{location.waveFt} ft</dd>
                     </div>
                   </dl>
-                  {item.safety ? (
-                    <p className="poke-card__fine">safety: {item.safety}</p>
-                  ) : (
-                    <p className="poke-card__fine">
-                      weakness: surge · resistance: patience · retreat cost: common
-                      sense
-                    </p>
-                  )}
+                  <p className="poke-card__fine">
+                    weakness: surge · resistance: patience · retreat cost:
+                    common sense
+                  </p>
                 </div>
               </Link>
             );

@@ -6,7 +6,7 @@ import uuid
 from pathlib import Path
 
 import boto3
-from botocore.exceptions import ClientError
+from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 from fastapi import HTTPException, status
 
 from app.core.config import settings
@@ -74,7 +74,7 @@ def presign_community_upload(user_id: str, body: MediaPresignRequest) -> MediaPr
             },
             ExpiresIn=settings.community_presign_ttl_seconds,
         )
-    except ClientError as e:
+    except (ClientError, BotoCoreError, NoCredentialsError) as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=f"S3 presign failed: {e}",

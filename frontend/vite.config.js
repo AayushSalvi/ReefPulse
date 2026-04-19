@@ -26,13 +26,14 @@ const reefpulseApiProxy = {
 };
 
 const devProxy = { ...caDataGovProxy, ...reefpulseApiProxy };
-
 export default defineConfig({
   root: "src",
   /** Load `.env` from `frontend/` (not `frontend/src/`) while `root` is `src`. */
   envDir: __dirname,
   plugins: [react()],
   server: {
+    // Avoid stale JS/CSS when iterating locally.
+    headers: { "Cache-Control": "no-store" },
     proxy: devProxy
   },
   preview: {

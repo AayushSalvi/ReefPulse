@@ -1,0 +1,246 @@
+.oracle {
+  --oracle-bg: radial-gradient(circle at 50% 18%, rgba(198, 255, 71, 0.1), transparent 40%),
+    linear-gradient(180deg, #05081f 0%, #0b1342 65%, #060b2d 100%);
+  --oracle-mood-serene: linear-gradient(135deg, #d9ff56 0%, #7fff96 100%);
+  --oracle-mood-luminous: linear-gradient(135deg, #8df2ff 0%, #4f8cff 100%);
+  --oracle-mood-volatile: linear-gradient(135deg, #ffd56b 0%, #ff9656 100%);
+  --oracle-mood-abyssal: linear-gradient(135deg, #6b78ff 0%, #2a2d5f 100%);
+  min-height: 100vh;
+  background: var(--oracle-bg);
+  color: #edf0ff;
+  padding: 1.2rem;
+  display: grid;
+  place-items: center;
+}
+
+.oracle--entry {
+  padding-top: 1.2rem;
+}
+
+.oracle-shell {
+  width: min(880px, 100%);
+  margin: 0 auto;
+}
+
+.oracle-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.9rem;
+}
+
+.oracle-brand {
+  color: #f2f6ff;
+  font-weight: 800;
+  font-size: 1.2rem;
+  text-decoration: none;
+}
+
+.oracle-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.oracle-links a {
+  color: rgba(237, 240, 255, 0.8);
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+
+.oracle-card {
+  border-radius: 24px;
+  padding: clamp(1.2rem, 3vw, 2rem);
+  border: 1px solid rgba(173, 193, 255, 0.28);
+  background: linear-gradient(160deg, rgba(6, 13, 46, 0.93), rgba(7, 11, 32, 0.94));
+  box-shadow: 0 26px 90px rgba(0, 0, 0, 0.52);
+  backdrop-filter: blur(10px);
+  perspective: 1100px;
+}
+
+.oracle-kicker {
+  margin: 0;
+  color: #cdff3d;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.oracle-card h1 {
+  margin: 0.7rem 0 0;
+  font-size: clamp(2.1rem, 5.6vw, 3.7rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.oracle-result-title {
+  margin: 0.7rem 0 0;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  line-height: 1.15;
+}
+
+.oracle-flip {
+  position: relative;
+  width: 100%;
+  min-height: 460px;
+  transform-style: preserve-3d;
+  transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.oracle-flip.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.oracle-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  border: 1px solid rgba(173, 193, 255, 0.2);
+  background: rgba(8, 18, 55, 0.55);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.oracle-face--back {
+  transform: rotateY(180deg);
+}
+
+.oracle-sub {
+  margin: 0.75rem 0 0;
+  color: rgba(237, 240, 255, 0.78);
+  font-size: 1rem;
+}
+
+.oracle-controls {
+  margin-top: 1.3rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.72rem;
+  align-items: end;
+}
+
+.oracle-controls label {
+  grid-column: 1 / -1;
+  font-size: 0.82rem;
+  color: rgba(237, 240, 255, 0.8);
+}
+
+.oracle-controls select {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(179, 205, 255, 0.35);
+  padding: 0.68rem 0.75rem;
+  background: rgba(12, 23, 65, 0.75);
+  color: #f4f7ff;
+  font: inherit;
+}
+
+.oracle-refresh {
+  border-radius: 12px;
+  border: none;
+  padding: 0.72rem 0.9rem;
+  background: #d5ff47;
+  color: #0d1f3a;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.oracle-mood {
+  margin-top: 1rem;
+  border-radius: 18px;
+  padding: 1rem 1.15rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  background: var(--oracle-mood-gradient);
+  color: #091326;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.oracle-mood-label {
+  font-size: clamp(1.3rem, 5vw, 2.8rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.oracle-mood-symbol {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  font-weight: 700;
+}
+
+.oracle-fortune {
+  margin: 1rem 0 0;
+  font-size: 1.07rem;
+  line-height: 1.6;
+  color: rgba(238, 242, 255, 0.94);
+  margin-bottom: 0;
+}
+
+.oracle-metrics {
+  margin: 1.2rem 0 0;
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.oracle-metrics > div {
+  border-radius: 12px;
+  background: rgba(13, 24, 67, 0.8);
+  border: 1px solid rgba(173, 193, 255, 0.2);
+  padding: 0.72rem 0.8rem;
+}
+
+.oracle-metrics dt {
+  margin: 0;
+  color: rgba(220, 231, 255, 0.74);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.66rem;
+}
+
+.oracle-metrics dd {
+  margin: 0.3rem 0 0;
+  font-size: 1.12rem;
+  font-weight: 800;
+}
+
+.oracle-actions {
+  margin-top: 1.3rem;
+  display: flex;
+  justify-content: center;
+}
+
+.oracle-enter-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+  border-radius: 999px;
+  border: none;
+  padding: 0.78rem 1.3rem;
+  background: #d5ff47;
+  color: #0d1f3a;
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.oracle-back-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-start;
+}
+
+@media (max-width: 700px) {
+  .oracle-controls {
+    grid-template-columns: 1fr;
+  }
+}
