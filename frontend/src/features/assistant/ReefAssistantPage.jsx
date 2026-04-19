@@ -1,5 +1,5 @@
 /**
- * Route: `/assistant` — Gemini-backed Q&A (API key on server only).
+ * Route: `/assistant` — coastal Q&A via ReefPulse API.
  */
 import { useCallback, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -59,6 +59,10 @@ export default function ReefAssistantPage() {
 
       <header className="rp-assistant-hero">
         <h1>ReefPulse Assistant</h1>
+        <p>
+          Quick answers on California beaches, snorkeling at a high level, and marine life IDs — not a substitute for
+          lifeguards or official forecasts.
+        </p>
       </header>
 
       <div

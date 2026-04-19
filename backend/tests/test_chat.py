@@ -14,14 +14,14 @@ PREFIX = "/api/v1"
 
 def test_chat_query_without_gemini_key_returns_503(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
-    monkeypatch.setenv("GEMINI_API_KEY", "")
+    monkeypatch.setattr("app.services.chat_service.resolve_gemini_api_key", lambda: "")
     r = client.post(f"{PREFIX}/chat/query", json={"message": "Hello"})
     assert r.status_code == 503
     assert "GEMINI_API_KEY" in r.json().get("detail", "")
 
 
 def test_chat_query_with_mocked_gemini_ok(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("GEMINI_API_KEY", "fake-key-for-test")
+    monkeypatch.setattr("app.services.chat_service.resolve_gemini_api_key", lambda: "fake-key-for-test")
     monkeypatch.setenv("GEMINI_MODEL", "gemini-2.5-flash")
 
     def handler(request: httpx.Request) -> httpx.Response:
