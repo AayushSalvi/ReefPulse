@@ -10,18 +10,15 @@
  */
 import { Link } from "react-router-dom";
 import { locationsBySafety } from "../../data/mockData";
+import ExploreGoogleMapPanel from "./ExploreGoogleMapPanel";
 import "./explore-app.css";
 
 function ExploreIndexPage() {
   const top = locationsBySafety().slice(0, 6);
   return (
     <div>
-      {/* —— Map-style hero (entry state) —— */}
-      <div className="ex-map-card">
-        <div className="ex-map-visual">
-          <div className="ex-map-caption">California coast · Select a beach from the sidebar</div>
-        </div>
-      </div>
+      {/* —— Google Map + search + lat/lng (see ExploreGoogleMapPanel) —— */}
+      <ExploreGoogleMapPanel />
 
       {/* —— Curated quick links —— */}
       <p style={{ margin: "0.5rem 0", fontWeight: 800, fontSize: "0.75rem", color: "#64748b", letterSpacing: "0.06em" }}>

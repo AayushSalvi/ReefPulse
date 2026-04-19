@@ -1,14 +1,13 @@
 /**
  * ReefPulse — application shell (persistent chrome)
  *
- * Single-row header: brand → main nav → icon shortcuts (Saved, Alerts, Profile).
- * No duplicate “Alerts / Saved” text link; `/saved` is reached via the bookmark and bell icons.
+ * Single-row header: brand → main nav → icon shortcuts (Saved, Alerts, Dashboard).
+ * `/saved` via bookmark and bell; `/dashboard` via the user icon on the right.
  */
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 
 /** Main nav items (beach-first IA). */
 const navItems = [
-  { to: "/dashboard", label: "Dashboard", end: true },
   { to: "/explore", label: "Explore location", end: false },
   { to: "/marine-life", label: "Marine life", end: true },
   { to: "/community", label: "Community", end: true }
@@ -84,9 +83,16 @@ function AppLayout() {
             <IconBell />
             <span className="visually-hidden">Alerts</span>
           </NavLink>
-          <span className="top-nav-icon top-nav-icon--ghost" title="Profile (demo)" aria-label="Profile, demo only">
+          <NavLink
+            to="/dashboard"
+            className={({ isActive }) => `top-nav-icon ${isActive ? "is-active" : ""}`}
+            title="Dashboard"
+            aria-label="Dashboard"
+            end
+          >
             <IconUser />
-          </span>
+            <span className="visually-hidden">Dashboard</span>
+          </NavLink>
         </div>
       </header>
 
