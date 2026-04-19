@@ -379,6 +379,27 @@ const species = [
   },
 ];
 
+function agentDebugLog(hypothesisId, location, message, data = {}, runId = "run1") {
+  // #region agent log
+  fetch("http://127.0.0.1:7299/ingest/b199d9fc-ddef-4145-9d59-b0f1ee99e6b6", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Debug-Session-Id": "ddf9dc",
+    },
+    body: JSON.stringify({
+      sessionId: "ddf9dc",
+      runId,
+      hypothesisId,
+      location,
+      message,
+      data,
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+  // #endregion
+}
+
 function HomeDashboardPage() {
   const safest = locationsBySafety();
   const topBeach = safest[0];
@@ -386,6 +407,39 @@ function HomeDashboardPage() {
   const homeHeroRef = useRef(null);
   const homeHeroFishFieldRef = useRef(null);
   const homeHeroFishSwimZoneRef = useRef(null);
+
+  useEffect(() => {
+    const urls = [
+      ...beachThumbs.map((url, i) => ({ section: "safestBeach", key: `beach-${i}`, url })),
+      ...species.map((s) => ({ section: "trendingMarineLife", key: s.name, url: s.img })),
+    ];
+    // #region agent log
+    agentDebugLog("H7", "HomeDashboardPage.jsx:image-check:start", "Starting home image verification", {
+      total: urls.length,
+    });
+    // #endregion
+    Promise.all(
+      urls.map(
+        (entry) =>
+          new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve({ ...entry, ok: true });
+            img.onerror = () => resolve({ ...entry, ok: false });
+            img.src = entry.url;
+          }),
+      ),
+    ).then((results) => {
+      const failed = results.filter((r) => !r.ok);
+      // #region agent log
+      agentDebugLog("H7", "HomeDashboardPage.jsx:image-check:result", "Completed home image verification", {
+        total: results.length,
+        successCount: results.length - failed.length,
+        failCount: failed.length,
+        failed: failed.slice(0, 8),
+      });
+      // #endregion
+    });
+  }, []);
 
   return (
     <div className="home">

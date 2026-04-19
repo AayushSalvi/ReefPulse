@@ -12,7 +12,7 @@ import {
   taxonPhotoUrl,
   taxaAutocomplete,
 } from "../../api/inaturalist";
-import { postSpeciesRank } from "../../api/speciesRank";
+import { getSpeciesRankByCoordinates, postSpeciesRank } from "../../api/speciesRank";
 import {
   findLocation,
   locationSpeciesDeck,
@@ -93,6 +93,10 @@ function agentDebugLog(hypothesisId, location, message, data = {}, runId = "run1
   // #endregion
 }
 
+const HAS_GOOGLE_IMAGE_FALLBACK_CONFIG = Boolean(
+  import.meta.env.VITE_GOOGLE_CSE_API_KEY && import.meta.env.VITE_GOOGLE_CSE_ID,
+);
+
 function seasonFromMonth() {
   const m = new Date().getMonth();
   if (m < 2 || m === 11) return "winter";
@@ -110,10 +114,43 @@ function stateVectorFromLocation(loc) {
   ];
 }
 
+function normalizedName(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/\(.*?\)/g, " ")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function speciesBaseTokens(value) {
+  return normalizedName(value)
+    .split(" ")
+    .filter((t) => t.length >= 4);
+}
+
+function taxonLooksLikeSpecies(taxon, speciesName) {
+  const tokens = speciesBaseTokens(speciesName);
+  if (!tokens.length) return false;
+  const taxonName = normalizedName(taxon?.name);
+  const matched = normalizedName(taxon?.matched_term);
+  return tokens.some((t) => taxonName.includes(t) || matched.includes(t));
+}
+
+function chooseTaxonBySpeciesMatch(results, speciesName) {
+  if (!Array.isArray(results) || !results.length) return null;
+  const exactish = results.filter((t) => taxonLooksLikeSpecies(t, speciesName));
+  if (exactish.length) return pickMarineTaxon(exactish);
+  return pickMarineTaxon(results);
+}
+
 function ExploreLocationPage() {
   const { locationId } = useParams();
   const [sp] = useSearchParams();
   const location = findLocation(locationId);
+  const mapLat = parseFloat(sp.get("mlat") || "");
+  const mapLng = parseFloat(sp.get("mlng") || "");
+  const usingMapCoords = Number.isFinite(mapLat) && Number.isFinite(mapLng);
 
   const [rankLoading, setRankLoading] = useState(true);
   const [rankError, setRankError] = useState(null);
@@ -130,14 +167,17 @@ function ExploreLocationPage() {
     let cancelled = false;
     setRankLoading(true);
     setRankError(null);
+    const rankLat = usingMapCoords ? mapLat : location.lat;
+    const rankLng = usingMapCoords ? mapLng : location.lng;
+    const date = new Date().toISOString().slice(0, 10);
     const body = {
       location: location.name,
-      latitude: location.lat,
-      longitude: location.lng,
+      latitude: rankLat,
+      longitude: rankLng,
       season: seasonFromMonth(),
       state_vector: stateVectorFromLocation(location),
       top_k: 10,
-      observed_date: new Date().toISOString().slice(0, 10),
+      observed_date: date,
       image_count: 0,
       temperature: Math.round(((location.waterTempF - 32) * (5 / 9)) * 10) / 10,
       min_probability: 0,
@@ -147,23 +187,85 @@ function ExploreLocationPage() {
     agentDebugLog("H1", "ExploreLocationPage.jsx:rank:start", "Posting rank request", {
       locationId: location.id,
       body,
+      usingMapCoords,
     });
     // #endregion
-    postSpeciesRank(body)
+    getSpeciesRankByCoordinates({
+      locationSlug: location.id,
+      latitude: rankLat,
+      longitude: rankLng,
+      topK: 10,
+      date,
+    })
       .then((data) => {
+        const rawPredictions = Array.isArray(data?.predictions)
+          ? data.predictions
+          : [];
+        const normalizedPredictions = rawPredictions.map((p) => ({
+          ...p,
+          species: p.species || p.name || "Unknown",
+          encounter_probability:
+            p.encounter_probability ?? p.probability ?? p.score ?? 0,
+          taxon_id:
+            p.taxon_id != null && p.taxon_id !== ""
+              ? String(p.taxon_id)
+              : "",
+          safety:
+            p.safety && typeof p.safety === "object"
+              ? p.safety
+              : typeof p.safety === "string"
+                ? { flag: p.safety, message: p.safety }
+                : {},
+        }));
+        const normalizedData = {
+          ...data,
+          predictions: normalizedPredictions,
+        };
         // #region agent log
         agentDebugLog("H1", "ExploreLocationPage.jsx:rank:success", "Rank request success", {
-          hasPredictions: Array.isArray(data?.predictions),
-          predictionCount: Array.isArray(data?.predictions) ? data.predictions.length : null,
-          firstPrediction: Array.isArray(data?.predictions) ? data.predictions[0] ?? null : null,
+          hasPredictions: Array.isArray(normalizedData?.predictions),
+          predictionCount: Array.isArray(normalizedData?.predictions)
+            ? normalizedData.predictions.length
+            : null,
+          firstPrediction: Array.isArray(normalizedData?.predictions)
+            ? normalizedData.predictions[0] ?? null
+            : null,
+          query: normalizedData?.query || null,
         });
         // #endregion
-        if (!cancelled) setRankPayload(data);
+        if (!cancelled) setRankPayload(normalizedData);
+      })
+      .catch((err) => {
+        // #region agent log
+        agentDebugLog(
+          "H1",
+          "ExploreLocationPage.jsx:rank:warn",
+          "Coordinate GET failed, trying POST compatibility",
+          {
+            error: err instanceof Error ? err.message : String(err),
+            usingMapCoords,
+          },
+        );
+        // #endregion
+        return postSpeciesRank(body);
+      })
+      .then((fallbackData) => {
+        if (!fallbackData) return;
+        // #region agent log
+        agentDebugLog("H1", "ExploreLocationPage.jsx:rank:post-success", "POST fallback rank success", {
+          hasPredictions: Array.isArray(fallbackData?.predictions),
+          predictionCount: Array.isArray(fallbackData?.predictions)
+            ? fallbackData.predictions.length
+            : null,
+        });
+        // #endregion
+        if (!cancelled) setRankPayload(fallbackData);
       })
       .catch((err) => {
         // #region agent log
         agentDebugLog("H1", "ExploreLocationPage.jsx:rank:error", "Rank request failed", {
           error: err instanceof Error ? err.message : String(err),
+          usingMapCoords,
         });
         // #endregion
         if (!cancelled) {
@@ -206,7 +308,25 @@ function ExploreLocationPage() {
           if (id) {
             const byId = await fetchTaxonById(id, ac.signal);
             const idUrl = taxonPhotoUrl(byId);
-            if (idUrl) return [cacheKey, idUrl];
+            if (idUrl && taxonLooksLikeSpecies(byId, speciesName)) {
+              // #region agent log
+              agentDebugLog("H6", "ExploreLocationPage.jsx:photo:pick-id", "Image chosen by taxon id", {
+                speciesName,
+                taxonId: id,
+                inatTaxonName: byId?.name || null,
+                cacheKey,
+              });
+              // #endregion
+              return [cacheKey, idUrl];
+            }
+            // #region agent log
+            agentDebugLog("H6", "ExploreLocationPage.jsx:photo:reject-id", "Taxon id image rejected as mismatch", {
+              speciesName,
+              taxonId: id,
+              inatTaxonName: byId?.name || null,
+              cacheKey,
+            });
+            // #endregion
           }
         } catch {
           // fallback to name search below
@@ -215,14 +335,33 @@ function ExploreLocationPage() {
         try {
           if (speciesName) {
             const results = await taxaAutocomplete(speciesName, ac.signal);
-            const picked = pickMarineTaxon(results);
+            const picked = chooseTaxonBySpeciesMatch(results, speciesName);
             const pickedUrl = taxonPhotoUrl(picked);
-            if (pickedUrl) return [cacheKey, pickedUrl];
+            if (pickedUrl) {
+              // #region agent log
+              agentDebugLog("H6", "ExploreLocationPage.jsx:photo:pick-name", "Image chosen by autocomplete fallback", {
+                speciesName,
+                taxonId: id || null,
+                pickedName: picked?.name || null,
+                matchedTerm: picked?.matched_term || null,
+                iconicTaxonId: picked?.iconic_taxon_id || null,
+                cacheKey,
+              });
+              // #endregion
+              return [cacheKey, pickedUrl];
+            }
           }
         } catch {
           // ignore; keep null fallback
         }
 
+        // #region agent log
+        agentDebugLog("H6", "ExploreLocationPage.jsx:photo:miss", "No image found in iNaturalist", {
+          speciesName,
+          taxonId: id || null,
+          cacheKey,
+        });
+        // #endregion
         return [cacheKey, null];
       }),
     ).then((pairs) => {
@@ -231,11 +370,28 @@ function ExploreLocationPage() {
       pairs.forEach(([key, url]) => {
         if (key && url) next[key] = url;
       });
+      const unresolved = pairs
+        .filter(([_, url]) => !url)
+        .slice(0, 6)
+        .map(([key]) => key)
+        .filter(Boolean);
       // #region agent log
       agentDebugLog("H2", "ExploreLocationPage.jsx:photo:resolved", "Photo hydration completed", {
         pairCount: pairs.length,
         resolvedPhotoCount: Object.keys(next).length,
+        unresolvedSpeciesSample: unresolved,
       });
+      // #endregion
+      // #region agent log
+      agentDebugLog(
+        "H5",
+        "ExploreLocationPage.jsx:google-fallback:config",
+        "Google image fallback config visibility",
+        {
+          enabled: HAS_GOOGLE_IMAGE_FALLBACK_CONFIG,
+          unresolvedCount: pairs.length - Object.keys(next).length,
+        },
+      );
       // #endregion
       setTaxonPhotos(next);
     });
@@ -298,7 +454,7 @@ function ExploreLocationPage() {
     });
     // #endregion
     return fallback;
-  }, [location, rankPayload, fallbackDeck]);
+  }, [location, rankPayload, fallbackDeck, taxonPhotos]);
 
   if (!location) {
     return <Navigate to="/explore" replace />;
@@ -355,8 +511,7 @@ function ExploreLocationPage() {
               item.apiLabel ||
               "Seasonal on this coast — confirm IDs in the field and follow wildlife rules.";
             const types = tcgTypesFromName(item.name);
-            const { hp, swim } = tcgStats(item.name, index, location);
-            const encounter = item.encounterPct;
+            const encounterPct = item.encounterPct;
             const dexLine = hint.length > 118 ? `${hint.slice(0, 116)}…` : hint;
             const barLabel = item.tierLabel ? `Rank ${item.rank}/10 · ${item.tierLabel}` : `Rank ${item.rank}/10`;
 
@@ -379,10 +534,6 @@ function ExploreLocationPage() {
                   </div>
                   <div className="poke-card__top">
                     <span className="poke-card__name">{item.name}</span>
-                    <span className="poke-card__hp-block">
-                      <span className="poke-card__hp-label">HP</span>
-                      <span className="poke-card__hp-val">{hp}</span>
-                    </span>
                   </div>
                   <div className="poke-card__types" aria-hidden>
                     {types.map((ty) => (
@@ -416,11 +567,7 @@ function ExploreLocationPage() {
                   <dl className="poke-card__stats">
                     <div>
                       <dt>Encounter</dt>
-                      <dd>{encounter}%</dd>
-                    </div>
-                    <div>
-                      <dt>Swim index</dt>
-                      <dd>{swim}</dd>
+                      <dd>{encounterPct}%</dd>
                     </div>
                     <div>
                       <dt>Waves</dt>
