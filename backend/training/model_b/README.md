@@ -2,6 +2,12 @@
 
 This folder is the training workspace for the ReefPulse anomaly detector.
 
+Current implementation and status notes live in:
+
+- `docs/model_b_progress.md`
+- `docs/model_b_next_steps.md`
+- `docs/model_b_llm_handoff.md`
+
 Recommended flow:
 
 1. Use `backend/app/pipelines/ingest_scripps.py` to upload raw CalCOFI data to S3.

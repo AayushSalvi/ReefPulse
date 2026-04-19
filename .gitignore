@@ -33,3 +33,5 @@ data/
 tmp/
 logs/
 *.sqlite3
+backend/training/model_b/artifacts/baseline/
+backend/training/model_b/artifacts/processed/
