@@ -39,10 +39,14 @@ model-a = [
   "torch>=2.2.0",
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["app*"]
-
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*", "inaturalist_usa_fish*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

@@ -6,10 +6,25 @@ Ocean intelligence for the California coast: forecasting, HAB risk, species disc
 
 | Path | Purpose |
 |------|---------|
-| `backend/` | FastAPI app, Model A code, services, tests |
+| `backend/` | FastAPI app, Model A / **Model D** integration, services, tests |
+| `backend/inaturalist_usa_fish/` | USA marine fish helper + optional Lambda (`infra/aws/inaturalist-fish-lambda/`) |
 | `docs/` | Architecture notes, **Model A runbook** → `docs/model-a/README.md` |
 | `infra/aws/` | AWS placeholders + **SageMaker Model A** shell helper |
 | `scripts/` | `launch_model_a_sagemaker_training.py`, SageMaker pip requirements |
+
+## Model D — Likelihood of fish at a location (SageMaker)
+
+**Goal:** **Model D** estimates **how likely different fish species are to be found** at a **location**—given **latitude/longitude** and optional **observation date**, it returns **ranked likelihoods** for the **top‑k** species from an AWS **SageMaker real-time endpoint** (JSON request/response). In plain terms: *“If you looked here (and when), what fish would you most expect to encounter?”*
+
+**What changed in this repo**
+
+- **API:** `GET /api/v1/species/{location_slug}?lat=&lon=&date=&top_k=` — see `backend/app/api/routes/species.py`.
+- **Service:** `backend/app/services/species_service.py` builds the payload (`latitude`, `longitude`, optional `date`, `top_k`) and invokes SageMaker via `invoke_sagemaker_json`.
+- **Routing:** logical key `SPECIES_FISH_RANKED` → endpoint name from settings — `backend/app/ml/model_registry.py`.
+- **AWS:** shared SageMaker Runtime client — `backend/app/clients/aws_clients.py`.
+- **Config:** `sagemaker_endpoint_species` (environment variable **`SAGEMAKER_ENDPOINT_SPECIES`**, default **`fish-sd-top100`**) in `backend/app/core/config.py`. Set this to your deployed endpoint name in `.env`.
+
+**Related:** The **`inaturalist_usa_fish`** package supports iNaturalist-based discovery workflows and an optional **SAM Lambda** (`infra/aws/inaturalist-fish-lambda/README.md`); Model D inference in the FastAPI app is SageMaker-backed as above.
 
 ## Model A (State Forecaster)
 

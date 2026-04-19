@@ -33,7 +33,9 @@ export default function RegisterPage() {
     <div className="auth-page">
       <div className="auth-card">
         <h1>Create account</h1>
-        <p className="sub">At least 8 characters for your password.</p>
+        <p className="sub">
+          At least 8 characters; passwords may not exceed 72 bytes when encoded as UTF-8 (bcrypt limit).
+        </p>
         {error ? <div className="auth-error">{error}</div> : null}
         <form className="auth-form" onSubmit={onSubmit}>
           <label htmlFor="reg-email">Email</label>
@@ -65,6 +67,7 @@ export default function RegisterPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             minLength={8}
+            maxLength={72}
             required
           />
           <div className="auth-actions">

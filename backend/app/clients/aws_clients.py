@@ -1,3 +1,5 @@
+"""Shared AWS SDK clients for the backend."""
+
 from __future__ import annotations
 
 from functools import lru_cache
@@ -26,3 +28,7 @@ def get_sagemaker_runtime_client() -> BaseClient:
 @lru_cache(maxsize=1)
 def get_sns_client() -> BaseClient:
     return get_boto3_session().client("sns")
+
+
+# * Same cached client as get_sagemaker_runtime_client; kept for species_service/tests.
+sagemaker_runtime_client = get_sagemaker_runtime_client
