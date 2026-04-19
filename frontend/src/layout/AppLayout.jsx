@@ -10,6 +10,7 @@ import { NavLink, Outlet, useLocation } from "react-router-dom";
 const navItems = [
   { to: "/explore", label: "Explore location", end: false },
   { to: "/marine-life", label: "Marine life", end: true },
+  { to: "/challenges", label: "Challenges", end: true },
   { to: "/community", label: "Community", end: true }
 ];
 
