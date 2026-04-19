@@ -51,3 +51,32 @@ def test_register_login_flow() -> None:
     assert me.status_code == 200
     assert me.json()["email"] == email
     assert me.json()["handle"] == "Tester"
+
+
+def test_register_password_over_72_bytes_returns_422() -> None:
+    import uuid
+
+    email = f"longpw_{uuid.uuid4().hex[:8]}@example.com"
+    r = client.post(
+        f"{PREFIX}/auth/register",
+        json={"email": email, "password": "x" * 73, "handle": "Tester"},
+    )
+    assert r.status_code == 422
+
+
+def test_register_72_byte_ascii_password_ok() -> None:
+    import uuid
+
+    email = f"bc72_{uuid.uuid4().hex[:8]}@example.com"
+    pw = "x" * 72
+    reg = client.post(f"{PREFIX}/auth/register", json={"email": email, "password": pw, "handle": "x"})
+    assert reg.status_code == 201
+
+
+def test_register_unicode_password_over_72_utf8_bytes_returns_422() -> None:
+    import uuid
+
+    email = f"uni_{uuid.uuid4().hex[:8]}@example.com"
+    pw = "\u3042" * 25  # 75 UTF-8 bytes, 25 characters
+    r = client.post(f"{PREFIX}/auth/register", json={"email": email, "password": pw, "handle": "x"})
+    assert r.status_code == 422

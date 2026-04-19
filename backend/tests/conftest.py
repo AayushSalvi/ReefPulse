@@ -25,4 +25,6 @@ rebuild_posts_fts(engine)
 
 
 def pytest_sessionfinish(session, exitstatus):  # noqa: ARG001
+    # * Close pooled connections so Windows can delete the temp SQLite file.
+    engine.dispose()
     Path(_TEST_DB_PATH).unlink(missing_ok=True)

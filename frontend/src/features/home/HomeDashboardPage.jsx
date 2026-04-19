@@ -13,6 +13,9 @@ import "./home.css";
 
 const HERO_FISH_COLOR = "#5866A7";
 
+/** HeroFishSvg head is on the left (−x); add this so `rotate()` matches swim direction from `atan2`. */
+const HERO_FISH_HEADING_OFFSET_DEG = 180;
+
 /** Cursor low-pass — school does not jerk on fast pointer moves. */
 const CURSOR_SMOOTH = 0.05;
 const FISH_LERP_MIN = 0.026;
@@ -192,7 +195,9 @@ function HomeHeroFishSchool({ heroRef, fieldRef, swimZoneRef }) {
         separateAndClamp();
         HERO_FISH_SCHOOL.forEach((cfg, i) => {
           const p = posRef.current[i];
-          const ang = (Math.atan2(sc.y - p.y, sc.x - p.x) * 180) / Math.PI;
+          const ang =
+            (Math.atan2(sc.y - p.y, sc.x - p.x) * 180) / Math.PI -
+            HERO_FISH_HEADING_OFFSET_DEG;
           angleRef.current[i] = ang;
           applyFish(i, p.x, p.y, ang);
         });
@@ -234,7 +239,8 @@ function HomeHeroFishSchool({ heroRef, fieldRef, swimZoneRef }) {
         const t = clampInSwim(sm.x + cfg.ox, sm.y + cfg.oy, cfg.size);
         const dx = t.x - p.x;
         const dy = t.y - p.y;
-        angleRef.current[i] = (Math.atan2(dy, dx) * 180) / Math.PI;
+        angleRef.current[i] =
+          (Math.atan2(dy, dx) * 180) / Math.PI - HERO_FISH_HEADING_OFFSET_DEG;
         applyFish(i, p.x, p.y, angleRef.current[i]);
       });
 

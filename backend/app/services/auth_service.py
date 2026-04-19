@@ -11,6 +11,7 @@ import jwt
 from fastapi import HTTPException, status
 from jwt.exceptions import PyJWTError
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -25,6 +26,7 @@ def verify_password(plain: str, password_hash: str) -> bool:
     try:
         return bcrypt.checkpw(plain.encode("utf-8"), password_hash.encode("utf-8"))
     except ValueError:
+        # * bcrypt rejects passwords over 72 bytes; treat as non-match so login stays 401.
         return False
 
 
@@ -48,7 +50,14 @@ def register_user(session: Session, *, email: str, password: str, handle: str | 
         handle=h[:128],
     )
     session.add(user)
-    session.flush()
+    try:
+        session.flush()
+    except IntegrityError as exc:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email already registered",
+        ) from exc
     return user
 
 
