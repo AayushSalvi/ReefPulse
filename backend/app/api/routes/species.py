@@ -6,21 +6,21 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.schemas.species import SpeciesRankRequest, SpeciesRankResponse
 from app.services import species_service
-from app.services.species_rank_service import rank_for_slug, rank_species
+from app.services.species_rank_service import rank_for_slug, rank_species_with_sagemaker_fallback
 
 router = APIRouter(prefix="/species", tags=["species"])
 
 
 @router.post("/rank", response_model=SpeciesRankResponse)
 def post_species_rank(body: SpeciesRankRequest) -> SpeciesRankResponse:
-    """Rank species encounters for a coordinate + context (fishdeck backend)."""
-    return rank_species(body)
+    """Rank species for Explore: SageMaker Model D when available, else deterministic demo."""
+    return rank_species_with_sagemaker_fallback(body)
 
 
 @router.get("/status")
 def get_species_status() -> dict[str, object]:
     return {
-        "species_rank_model": "deterministic-demo-v1",
+        "species_rank_model": "sagemaker-with-demo-fallback",
         "ready": True,
         "endpoints": ["/species/rank", "/species/{location_slug}"],
     }

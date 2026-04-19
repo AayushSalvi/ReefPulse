@@ -103,8 +103,10 @@ export default function MarineLifeGoogleDistributionMap({
       <div className="ml-google-map ml-google-map--missing" role="status">
         <p className="ml-google-map-missing-title">Interactive map needs an API key</p>
         <p className="ml-google-map-missing-text">
-          Add <code className="ml-google-map-code">VITE_GOOGLE_MAPS_API_KEY</code> to{" "}
-          <code className="ml-google-map-code">frontend/.env</code> and restart the dev server. Enable the{" "}
+          Set <code className="ml-google-map-code">VITE_GOOGLE_MAPS_API_KEY</code> or{" "}
+          <code className="ml-google-map-code">GOOGLE_MAPS_API_KEY</code> in{" "}
+          <code className="ml-google-map-code">frontend/.env</code>, repo root <code className="ml-google-map-code">.env</code>, or{" "}
+          <code className="ml-google-map-code">backend/.env</code>, then restart Vite. Enable the{" "}
           <strong>Maps JavaScript API</strong> for this project.
         </p>
       </div>
