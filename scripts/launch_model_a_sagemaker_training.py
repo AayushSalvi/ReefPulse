@@ -63,6 +63,14 @@ def main() -> None:
         help="0 = use all. Else random subset for faster jobs.",
     )
     parser.add_argument("--max-val-samples", type=int, default=0)
+    parser.add_argument("--huber-delta", type=float, default=1.0)
+    parser.add_argument("--early-stopping-patience", type=int, default=8)
+    parser.add_argument("--weight-decay", type=float, default=0.02)
+    parser.add_argument(
+        "--disable-scheduler",
+        action="store_true",
+        help="Pass disable-scheduler=true to training container.",
+    )
     parser.add_argument(
         "--framework-version",
         default="2.2.0",
@@ -96,6 +104,11 @@ def main() -> None:
         hps["max-train-samples"] = str(args.max_train_samples)
     if args.max_val_samples > 0:
         hps["max-val-samples"] = str(args.max_val_samples)
+    hps["huber-delta"] = str(args.huber_delta)
+    hps["early-stopping-patience"] = str(args.early_stopping_patience)
+    hps["weight-decay"] = str(args.weight_decay)
+    if args.disable_scheduler:
+        hps["disable-scheduler"] = "true"
 
     estimator = PyTorch(
         entry_point="train_sagemaker_model_a.py",

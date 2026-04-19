@@ -93,6 +93,15 @@ def main() -> None:
 
     from app.ml.model_a.train import train_and_save
 
+    huber_delta = _float(hps, "huber-delta", "huber_delta", default=1.0)
+    es_patience = _int(hps, "early-stopping-patience", "early_stopping_patience", default=8)
+    weight_decay = _float(hps, "weight-decay", "weight_decay", default=0.02)
+    disable_sched = str(hps.get("disable-scheduler", hps.get("disable_scheduler", "false"))).lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+
     metrics = train_and_save(
         train_npz,
         val_npz,
@@ -104,6 +113,10 @@ def main() -> None:
         seed=seed,
         max_train_samples=max_train,
         max_val_samples=max_val,
+        huber_delta=huber_delta,
+        early_stopping_patience=es_patience,
+        weight_decay=weight_decay,
+        use_scheduler=not disable_sched,
     )
     print(f"saved checkpoint to {out_ckpt}", flush=True)
     print(f"metrics: {metrics}", flush=True)

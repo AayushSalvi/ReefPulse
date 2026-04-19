@@ -22,7 +22,7 @@ class PatchTSTMini(nn.Module):
         nhead: int = 4,
         num_layers: int = 3,
         dim_ff: int = 256,
-        dropout: float = 0.15,
+        dropout: float = 0.22,
     ) -> None:
         super().__init__()
         self.n_vars = n_vars
