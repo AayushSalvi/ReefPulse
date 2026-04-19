@@ -1,0 +1,116 @@
+/* ReefPulse — Saved & alerts page (`SavedPlacesPage.jsx`) */
+
+.saved-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.saved-grid {
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 320px);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 800px) {
+  .saved-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.saved-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.saved-list a {
+  display: block;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+}
+
+.saved-list a:hover {
+  border-color: #dfff4f;
+  box-shadow: 0 4px 14px rgba(27, 37, 75, 0.08);
+}
+
+.saved-list strong {
+  display: block;
+  color: #1b254b;
+  margin-bottom: 0.25rem;
+}
+
+.saved-list span {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.saved-hint {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.saved-hint a {
+  font-weight: 700;
+  color: #0f766e;
+}
+
+.saved-alerts {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+}
+
+.saved-alerts h2 {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  color: #1b254b;
+}
+
+.saved-alerts ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.saved-alerts li {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.saved-alerts li:last-child {
+  border-bottom: 0;
+}
+
+.saved-type {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #b45309;
+  margin-bottom: 0.2rem;
+}
+
+.saved-alerts strong {
+  display: block;
+  color: #1b254b;
+  font-size: 0.9rem;
+}
+
+.saved-alerts p {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: #475569;
+  line-height: 1.45;
+}

@@ -1,0 +1,372 @@
+/* =============================================================================
+   ReefPulse — Dashboard page styles (`UserDashboardPage.jsx`)
+   Sections map to numbered regions in that file (hero, cards, species row, etc.).
+   ============================================================================= */
+
+.dash-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.dash-alert-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  margin-bottom: 0.85rem;
+  border: 1px solid transparent;
+}
+
+.dash-alert-badge--ok {
+  background: #ecfdf5;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.dash-alert-badge--warn {
+  background: #fff7ed;
+  color: #c2410c;
+  border-color: #fed7aa;
+}
+
+.dash-hero {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 200px;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(135deg, #1b254b 0%, #2d3a66 50%, #0f766e 100%);
+  color: #fff;
+  padding: 1.5rem clamp(1rem, 4vw, 2rem);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.dash-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr minmax(160px, 240px);
+  gap: 1.25rem;
+  align-items: center;
+}
+
+@media (max-width: 720px) {
+  .dash-hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dash-hero-kicker {
+  margin: 0 0 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.dash-hero h2 {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  font-weight: 800;
+  color: #dfff4f;
+}
+
+.dash-hero-map {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  min-height: 140px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.dash-hero-map-inner {
+  position: absolute;
+  inset: 0;
+  background: url("https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=600&q=80") center / cover;
+  opacity: 0.85;
+}
+
+.dash-hero-map-pin {
+  position: absolute;
+  left: 52%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2dd4bf;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.35);
+  z-index: 2;
+}
+
+.dash-hero-map-cap {
+  position: absolute;
+  bottom: 0.45rem;
+  left: 0.45rem;
+  right: 0.45rem;
+  z-index: 2;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.3rem 0.5rem;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.78);
+  text-align: center;
+}
+
+.dash-verdict-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0.5rem;
+}
+
+.dash-verdict {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.dash-verdict--good {
+  background: rgba(34, 197, 94, 0.25);
+  color: #bbf7d0;
+  border: 1px solid rgba(187, 247, 208, 0.5);
+}
+
+.dash-verdict--caution {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fef3c7;
+  border: 1px solid rgba(253, 230, 138, 0.45);
+}
+
+.dash-verdict--bad {
+  background: rgba(248, 113, 113, 0.2);
+  color: #fecaca;
+  border: 1px solid rgba(254, 202, 202, 0.45);
+}
+
+.dash-safety-pill {
+  font-size: 0.78rem;
+  opacity: 0.95;
+}
+
+.dash-safety-pill strong {
+  font-size: 1rem;
+  color: #dfff4f;
+}
+
+.dash-hero-meta {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.dash-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dash-hero-actions a,
+.dash-hero-actions button {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.dash-hero-actions a.primary {
+  background: #dfff4f;
+  color: #1b254b;
+}
+
+.dash-hero-actions a.secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.dash-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.dash-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+}
+
+.dash-card small {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 0.25rem;
+}
+
+.dash-card strong {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1b254b;
+}
+
+.dash-section-title {
+  margin: 0 0 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.dash-species-row {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.25rem;
+  scroll-snap-type: x mandatory;
+}
+
+.dash-species-card {
+  flex: 0 0 140px;
+  scroll-snap-align: start;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.dash-species-card .img {
+  height: 88px;
+  background: linear-gradient(145deg, #0ea5e9, #1b254b);
+}
+
+.dash-species-card .body {
+  padding: 0.5rem 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1b254b;
+}
+
+.dash-sightings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+
+.dash-sighting {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.dash-sighting-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #dfff4f, #86efac);
+  flex-shrink: 0;
+}
+
+.dash-sighting-body strong {
+  color: #1b254b;
+}
+
+.dash-sighting-body span {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.dash-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.dash-actions a {
+  padding: 0.55rem 1rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+  background: #1b254b;
+  color: #fff;
+}
+
+.dash-actions a.outline {
+  background: #fff;
+  color: #1b254b;
+  border: 2px solid #1b254b;
+}
+
+.dash-explore-card {
+  padding: 1.1rem 1.25rem;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+}
+
+.dash-explore-card h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  color: #1b254b;
+}
+
+.dash-explore-card p {
+  margin: 0 0 0.75rem;
+  font-size: 0.88rem;
+  color: #64748b;
+}
+
+.dash-explore-card a {
+  font-weight: 800;
+  color: #0f766e;
+}
+
+.dash-why {
+  margin-top: 1.5rem;
+  padding: 1rem 1.15rem;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+}
+
+.dash-why h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #1b254b;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.dash-why p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #64748b;
+}
