@@ -7,8 +7,9 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.constants import DEMO_USER_UUID
+from app.core.constants import DEMO_USER_EMAIL, DEMO_USER_PASSWORD, DEMO_USER_UUID
 from app.db.models import Post, User, UserChallengeProgress
+from app.services.auth_service import hash_password
 
 
 def _utcnow() -> datetime:
@@ -19,7 +20,13 @@ def seed_if_empty(session: Session) -> None:
     if session.scalar(select(User).where(User.id == DEMO_USER_UUID)):
         return
 
-    demo = User(id=DEMO_USER_UUID, external_key="demo", handle="You")
+    demo = User(
+        id=DEMO_USER_UUID,
+        external_key="demo",
+        email=DEMO_USER_EMAIL,
+        password_hash=hash_password(DEMO_USER_PASSWORD),
+        handle="You",
+    )
     session.add(demo)
 
     progress_rows = [

@@ -17,6 +17,10 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Node / frontend tooling (never commit dependencies or Vite cache)
+node_modules/
+**/.vite/
+
 # Build / reports
 dist/
 build/
@@ -34,5 +38,6 @@ backend/model_a_data/
 tmp/
 logs/
 *.sqlite3
+backend/reefpulse.db
 backend/training/model_b/artifacts/baseline/
 backend/training/model_b/artifacts/processed/

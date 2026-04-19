@@ -16,6 +16,8 @@
  */
 import { Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
+import LoginPage from "./features/auth/LoginPage";
+import RegisterPage from "./features/auth/RegisterPage";
 import ChallengesPage from "./features/challenges/ChallengesPage";
 import CommunityPage from "./features/community/CommunityPage";
 import ExploreForecastRedirect from "./features/explore/ExploreForecastRedirect";
@@ -31,6 +33,8 @@ import UserDashboardPage from "./features/dashboard/UserDashboardPage";
 function App() {
   return (
     <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route element={<AppLayout />}>
         {/* —— Public / marketing home —— */}
         <Route path="/" element={<HomeDashboardPage />} />

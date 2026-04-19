@@ -129,6 +129,24 @@ body {
   border-bottom-color: var(--rp-lime);
 }
 
+button.top-nav-link {
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+.top-nav-user {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 0.35rem;
+}
+
 .page-content {
   flex: 1;
 }

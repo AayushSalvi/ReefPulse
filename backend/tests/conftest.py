@@ -13,9 +13,11 @@ os.environ["DATABASE_URL"] = f"sqlite:///{_TEST_DB_PATH}"
 from app.db.base import Base  # noqa: E402
 from app.db.seed import seed_if_empty  # noqa: E402
 from app.db.session import SessionLocal, engine  # noqa: E402
+from app.db.sqlite_migrate import apply_sqlite_user_auth_columns  # noqa: E402
 from app.db.sqlite_fts import rebuild_posts_fts  # noqa: E402
 
 Base.metadata.create_all(bind=engine)
+apply_sqlite_user_auth_columns(engine)
 with SessionLocal() as session:
     seed_if_empty(session)
     session.commit()

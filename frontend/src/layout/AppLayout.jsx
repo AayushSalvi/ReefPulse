@@ -4,7 +4,8 @@
  * Single-row header: brand → main nav → icon shortcuts (Saved, Alerts, Profile).
  * No duplicate “Alerts / Saved” text link; `/saved` is reached via the bookmark and bell icons.
  */
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 
 /** Main nav items (beach-first IA). */
 const navItems = [
@@ -43,6 +44,8 @@ function IconUser() {
 
 function AppLayout() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { user, loading, logout } = useAuth();
   const isHome = pathname === "/";
   const fullBleed = isHome;
 
@@ -85,9 +88,34 @@ function AppLayout() {
             <IconBell />
             <span className="visually-hidden">Alerts</span>
           </NavLink>
-          <span className="top-nav-icon top-nav-icon--ghost" title="Profile (demo)" aria-label="Profile, demo only">
-            <IconUser />
-          </span>
+          {loading ? (
+            <span className="top-nav-user" aria-live="polite">
+              …
+            </span>
+          ) : user ? (
+            <>
+              <span className="top-nav-user" title={user.email || user.id}>
+                <span style={{ display: "inline-flex", marginRight: "0.35rem", verticalAlign: "middle", opacity: 0.85 }}>
+                  <IconUser />
+                </span>
+                {user.handle}
+              </span>
+              <button
+                type="button"
+                className="top-nav-link"
+                onClick={async () => {
+                  await logout();
+                  navigate("/", { replace: true });
+                }}
+              >
+                Log out
+              </button>
+            </>
+          ) : (
+            <NavLink to="/login" className="top-nav-link" state={{ from: { pathname } }}>
+              Log in
+            </NavLink>
+          )}
         </div>
       </header>
 
