@@ -23,6 +23,8 @@ def test_species_rank_post_returns_top_predictions() -> None:
     assert len(data["predictions"]) == 10
     first = data["predictions"][0]
     assert "species" in first
+    assert isinstance(first["taxon_id"], str)
+    assert isinstance(first["safety"], dict)
     assert 0 <= first["encounter_probability"] <= 1
     probs = [p["encounter_probability"] for p in data["predictions"]]
     assert probs == sorted(probs, reverse=True)

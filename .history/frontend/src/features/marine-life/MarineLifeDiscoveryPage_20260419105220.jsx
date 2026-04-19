@@ -761,7 +761,7 @@ function MarineLifeDiscoveryPage() {
         >
           <Link
             to="/community"
-            style={{ fontWeight: 700, fontSize: "0.88rem", color: "#FAFF6C" }}
+            style={{ fontWeight: 700, fontSize: "0.88rem" }}
           >
             Open full community feed →
           </Link>

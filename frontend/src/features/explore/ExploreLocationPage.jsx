@@ -6,6 +6,12 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  fetchTaxonById,
+  pickMarineTaxon,
+  taxonPhotoUrl,
+  taxaAutocomplete,
+} from "../../api/inaturalist";
 import { postSpeciesRank } from "../../api/speciesRank";
 import {
   findLocation,
@@ -66,6 +72,27 @@ const CARD_TONE_CYCLE = [
   { key: "lime", hex: "#D9F274" },
 ];
 
+function agentDebugLog(hypothesisId, location, message, data = {}, runId = "run1") {
+  // #region agent log
+  fetch("http://127.0.0.1:7299/ingest/b199d9fc-ddef-4145-9d59-b0f1ee99e6b6", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Debug-Session-Id": "ddf9dc",
+    },
+    body: JSON.stringify({
+      sessionId: "ddf9dc",
+      runId,
+      hypothesisId,
+      location,
+      message,
+      data,
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+  // #endregion
+}
+
 function seasonFromMonth() {
   const m = new Date().getMonth();
   if (m < 2 || m === 11) return "winter";
@@ -91,6 +118,7 @@ function ExploreLocationPage() {
   const [rankLoading, setRankLoading] = useState(true);
   const [rankError, setRankError] = useState(null);
   const [rankPayload, setRankPayload] = useState(null);
+  const [taxonPhotos, setTaxonPhotos] = useState({});
 
   const fallbackDeck = useMemo(
     () => (location ? locationSpeciesDeck(location) : []),
@@ -115,11 +143,29 @@ function ExploreLocationPage() {
       min_probability: 0,
       rarity: "",
     };
+    // #region agent log
+    agentDebugLog("H1", "ExploreLocationPage.jsx:rank:start", "Posting rank request", {
+      locationId: location.id,
+      body,
+    });
+    // #endregion
     postSpeciesRank(body)
       .then((data) => {
+        // #region agent log
+        agentDebugLog("H1", "ExploreLocationPage.jsx:rank:success", "Rank request success", {
+          hasPredictions: Array.isArray(data?.predictions),
+          predictionCount: Array.isArray(data?.predictions) ? data.predictions.length : null,
+          firstPrediction: Array.isArray(data?.predictions) ? data.predictions[0] ?? null : null,
+        });
+        // #endregion
         if (!cancelled) setRankPayload(data);
       })
       .catch((err) => {
+        // #region agent log
+        agentDebugLog("H1", "ExploreLocationPage.jsx:rank:error", "Rank request failed", {
+          error: err instanceof Error ? err.message : String(err),
+        });
+        // #endregion
         if (!cancelled) {
           setRankPayload(null);
           setRankError(err instanceof Error ? err.message : "Rank API failed");
@@ -133,35 +179,125 @@ function ExploreLocationPage() {
     };
   }, [location]);
 
+  useEffect(() => {
+    const preds = rankPayload?.predictions;
+    // #region agent log
+    agentDebugLog("H2", "ExploreLocationPage.jsx:photo:start", "Photo hydration entered", {
+      hasPredictions: Array.isArray(preds),
+      predictionCount: Array.isArray(preds) ? preds.length : null,
+    });
+    // #endregion
+    if (!Array.isArray(preds) || preds.length === 0) {
+      setTaxonPhotos({});
+      return undefined;
+    }
+
+    let cancelled = false;
+    const ac = new AbortController();
+
+    Promise.all(
+      preds.map(async (p) => {
+        const id = String(p.taxon_id || "").trim();
+        const speciesName = String(p.species || "").trim();
+        const cacheKey = id || speciesName;
+        if (!cacheKey) return [cacheKey, null];
+
+        try {
+          if (id) {
+            const byId = await fetchTaxonById(id, ac.signal);
+            const idUrl = taxonPhotoUrl(byId);
+            if (idUrl) return [cacheKey, idUrl];
+          }
+        } catch {
+          // fallback to name search below
+        }
+
+        try {
+          if (speciesName) {
+            const results = await taxaAutocomplete(speciesName, ac.signal);
+            const picked = pickMarineTaxon(results);
+            const pickedUrl = taxonPhotoUrl(picked);
+            if (pickedUrl) return [cacheKey, pickedUrl];
+          }
+        } catch {
+          // ignore; keep null fallback
+        }
+
+        return [cacheKey, null];
+      }),
+    ).then((pairs) => {
+      if (cancelled) return;
+      const next = {};
+      pairs.forEach(([key, url]) => {
+        if (key && url) next[key] = url;
+      });
+      // #region agent log
+      agentDebugLog("H2", "ExploreLocationPage.jsx:photo:resolved", "Photo hydration completed", {
+        pairCount: pairs.length,
+        resolvedPhotoCount: Object.keys(next).length,
+      });
+      // #endregion
+      setTaxonPhotos(next);
+    });
+
+    return () => {
+      cancelled = true;
+      ac.abort();
+    };
+  }, [rankPayload]);
+
   const deck = useMemo(() => {
     if (!location) return [];
     const preds = rankPayload?.predictions;
     if (Array.isArray(preds) && preds.length) {
-      return preds.map((p, i) => {
+      const built = preds.map((p, i) => {
         const name = p.species || "Unknown";
         const profile = matchSpeciesQuery(name);
+        const taxonId = String(p.taxon_id || "");
+        const inatImage = taxonPhotos[taxonId || name] || null;
+        const safetyPayload = p.safety && typeof p.safety === "object" ? p.safety : {};
         return {
           id: `rank-${location.id}-${i}-${name}`,
           name,
           rank: i + 1,
           encounterPct: Math.round((p.encounter_probability ?? 0) * 1000) / 10,
           profile,
+          inatImage,
           tierLabel: (p.rarity || "common").replace(/^./, (c) => c.toUpperCase()),
           apiLabel: p.label || "",
-          safety: p.safety || "",
+          safety:
+            typeof safetyPayload.message === "string"
+              ? safetyPayload.message
+              : p.safety_flag || "",
         };
       });
+      // #region agent log
+      agentDebugLog("H3", "ExploreLocationPage.jsx:deck:ranked", "Deck built from ranked predictions", {
+        deckCount: built.length,
+        photoCacheCount: Object.keys(taxonPhotos).length,
+        withImageCount: built.filter((item) => Boolean(item.inatImage || item.profile?.detailImage)).length,
+      });
+      // #endregion
+      return built;
     }
-    return fallbackDeck.map((item, i) => ({
+    const fallback = fallbackDeck.map((item, i) => ({
       id: item.id,
       name: item.name,
       rank: i + 1,
       encounterPct: tcgStats(item.name, i, location).encounter,
       profile: item.profile,
+      inatImage: null,
       tierLabel: null,
       apiLabel: "",
       safety: "",
     }));
+    // #region agent log
+    agentDebugLog("H4", "ExploreLocationPage.jsx:deck:fallback", "Deck built from fallback data", {
+      fallbackCount: fallback.length,
+      rankError,
+    });
+    // #endregion
+    return fallback;
   }, [location, rankPayload, fallbackDeck]);
 
   if (!location) {
@@ -213,7 +349,7 @@ function ExploreLocationPage() {
         <div className="ex-poke-grid">
           {deck.map((item, index) => {
             const tone = CARD_TONE_CYCLE[index % CARD_TONE_CYCLE.length];
-            const img = item.profile?.detailImage;
+            const img = item.inatImage || item.profile?.detailImage;
             const hint =
               item.profile?.hint ||
               item.apiLabel ||
@@ -222,10 +358,7 @@ function ExploreLocationPage() {
             const { hp, swim } = tcgStats(item.name, index, location);
             const encounter = item.encounterPct;
             const dexLine = hint.length > 118 ? `${hint.slice(0, 116)}…` : hint;
-            const barLabel =
-              item.tierLabel && rankPayload
-                ? `Rank ${item.rank}/10 · ${item.tierLabel}`
-                : `Rank ${item.rank}/10`;
+            const barLabel = item.tierLabel ? `Rank ${item.rank}/10 · ${item.tierLabel}` : `Rank ${item.rank}/10`;
 
             return (
               <Link

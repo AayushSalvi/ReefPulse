@@ -272,7 +272,7 @@ button.top-nav-link {
 .rp-page-title {
   margin: 0 0 1.25rem;
   padding: 1rem 1.25rem;
-  background: linear-gradient(135deg, var(--rp-navy) 0%, #ced3e1 100%);
+  background: linear-gradient(135deg, var(--rp-navy) 0%, #2a3766 100%);
   color: var(--rp-white);
 }
 

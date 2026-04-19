@@ -12,8 +12,8 @@ export default function ReefAssistantPage() {
   const [rows, setRows] = useState(() => [
     {
       role: "assistant",
-      text: "Ask about California beaches, snorkeling conditions at a high level, or marine life IDs — not a substitute for lifeguards or official forecasts.",
-    },
+      text: "Ask about California beaches, snorkeling conditions at a high level, or marine life IDs — not a substitute for lifeguards or official forecasts."
+    }
   ]);
   const [busy, setBusy] = useState(false);
   const bottomRef = useRef(null);
@@ -35,14 +35,7 @@ export default function ReefAssistantPage() {
       requestAnimationFrame(scrollDown);
     } catch (ex) {
       const msg = ex instanceof Error ? ex.message : "Request failed";
-      setRows((r) => [
-        ...r,
-        {
-          role: "assistant",
-          text: `Could not get a reply: ${msg}`,
-          isError: true,
-        },
-      ]);
+      setRows((r) => [...r, { role: "assistant", text: `Could not get a reply: ${msg}`, isError: true }]);
     } finally {
       setBusy(false);
       requestAnimationFrame(scrollDown);
@@ -59,26 +52,22 @@ export default function ReefAssistantPage() {
 
       <header className="rp-assistant-hero">
         <h1>ReefPulse Assistant</h1>
+        <p>
+          Powered by Google Gemini via your backend (<code className="rp-assistant-code">GEMINI_API_KEY</code>, optional{" "}
+          <code className="rp-assistant-code">GEMINI_MODEL</code>). Nothing is sent to Google from the browser except through
+          your API.
+        </p>
       </header>
 
-      <div
-        className="rp-assistant-chat"
-        role="log"
-        aria-live="polite"
-        aria-relevant="additions"
-      >
+      <div className="rp-assistant-chat" role="log" aria-live="polite" aria-relevant="additions">
         {rows.map((row, i) => (
           <div
             key={i}
             className={`rp-assistant-row rp-assistant-row--${row.role}${row.isError ? " rp-assistant-row--err" : ""}`}
           >
-            <span className="rp-assistant-role">
-              {row.role === "user" ? "You" : "Assistant"}
-            </span>
+            <span className="rp-assistant-role">{row.role === "user" ? "You" : "Assistant"}</span>
             <div className="rp-assistant-bubble">{row.text}</div>
-            {row.model ? (
-              <span className="rp-assistant-model">{row.model}</span>
-            ) : null}
+            {row.model ? <span className="rp-assistant-model">{row.model}</span> : null}
           </div>
         ))}
         <div ref={bottomRef} />
@@ -97,11 +86,7 @@ export default function ReefAssistantPage() {
           placeholder="e.g. What should I check before snorkeling at La Jolla Shores?"
           disabled={busy}
         />
-        <button
-          type="submit"
-          className="rp-assistant-send"
-          disabled={busy || !input.trim()}
-        >
+        <button type="submit" className="rp-assistant-send" disabled={busy || !input.trim()}>
           {busy ? "Thinking…" : "Send"}
         </button>
       </form>

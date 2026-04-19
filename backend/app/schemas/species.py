@@ -27,9 +27,12 @@ class SpeciesRankRequest(BaseModel):
 class SpeciesPrediction(BaseModel):
     species: str
     encounter_probability: float = Field(..., ge=0.0, le=1.0)
-    taxon_id: int = Field(default=0, description="iNaturalist-style taxon id placeholder in demo.")
+    taxon_id: str = Field(default="0", description="iNaturalist-style taxon id.")
     rarity: str
-    safety: str
+    safety: dict[str, object] = Field(
+        default_factory=dict,
+        description="Structured safety payload for UI chips and future rule checks.",
+    )
     label: str
     rarity_flag: bool = False
     safety_flag: str = Field(default="ok", description="ok | caution | avoid in demo.")

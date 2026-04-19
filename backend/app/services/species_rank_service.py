@@ -67,17 +67,21 @@ def rank_species(req: SpeciesRankRequest) -> SpeciesRankResponse:
     for prob, row in top:
         p = float(prob)
         rarity = "rare" if p >= 0.78 else "uncommon" if p >= 0.55 else "common"
-        safety = "caution" if p < 0.35 else "ok"
+        safety_flag = "caution" if p < 0.35 else "ok"
+        safety = {
+            "flag": safety_flag,
+            "message": "Limited confidence for close encounter." if safety_flag == "caution" else "Normal viewing conditions.",
+        }
         predictions.append(
             SpeciesPrediction(
                 species=str(row["species"]),
                 encounter_probability=round(p, 4),
-                taxon_id=int(row["taxon_id"]),
+                taxon_id=str(row["taxon_id"]),
                 rarity=rarity,
                 safety=safety,
                 label=str(row["label"]),
                 rarity_flag=rarity == "rare",
-                safety_flag="avoid" if safety != "ok" else "ok",
+                safety_flag="avoid" if safety_flag != "ok" else "ok",
             )
         )
 
