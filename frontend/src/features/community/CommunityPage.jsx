@@ -3,7 +3,7 @@
  *
  * Route: `/community`  ·  Styles: `./community.css`, `../explore/workflow.css`
  */
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   createCommunityComment,
@@ -17,6 +17,7 @@ import {
   unsaveCommunityPost,
   uploadFileToPresignedUrl,
 } from "../../api/community";
+import { taxaAutocomplete, taxonPhotoUrl } from "../../api/inaturalist";
 import { useAuth } from "../../auth/AuthContext";
 import { getChallengeIconId } from "../../data/challengesData";
 import { locations } from "../../data/mockData";
@@ -100,6 +101,11 @@ function normalizeFeedPost(p) {
     createdAt: p.created_at,
     time: toRelativeTime(p.created_at),
   };
+}
+
+function isPreferredMarineSpecies(species) {
+  const s = String(species || "").toLowerCase();
+  return s.includes("fish") || s.includes("turtle") || s.includes("sea lion");
 }
 
 function IconHeart() {
@@ -309,6 +315,12 @@ function ComposerBlock({
   setDraft,
   species,
   setSpecies,
+  speciesSuggestRows,
+  speciesSuggestLoading,
+  speciesSuggestOpen,
+  onPickSpeciesSuggestion,
+  onSpeciesFocus,
+  onSpeciesBlur,
   locationId,
   setLocationId,
   whenLocal,
@@ -324,6 +336,7 @@ function ComposerBlock({
   postPending,
   postStatus
 }) {
+  const speciesListboxId = useId();
   return (
     <section className="comm-panel comm-panel--compose" aria-label="Create post">
       <div className="comm-panel-head">
@@ -393,13 +406,75 @@ function ComposerBlock({
             </label>
             <label className="comm-field comm-field--block">
               <span className="comm-field-label">Tag species (if known)</span>
-              <input
-                className="comm-input"
-                type="text"
-                value={species}
-                onChange={(e) => setSpecies(e.target.value)}
-                placeholder="e.g. Garibaldi, leopard shark"
-              />
+              <div className="comm-species-combo">
+                <input
+                  className="comm-input"
+                  type="text"
+                  role="combobox"
+                  aria-expanded={speciesSuggestOpen}
+                  aria-controls={speciesListboxId}
+                  aria-autocomplete="list"
+                  value={species}
+                  onChange={(e) => setSpecies(e.target.value)}
+                  onFocus={onSpeciesFocus}
+                  onBlur={onSpeciesBlur}
+                  placeholder="Search iNaturalist species (e.g. Garibaldi, leopard shark)"
+                  autoComplete="off"
+                />
+                {speciesSuggestOpen &&
+                (speciesSuggestRows.length > 0 || speciesSuggestLoading) ? (
+                  <ul
+                    id={speciesListboxId}
+                    className="comm-species-suggest"
+                    role="listbox"
+                    aria-label="Species suggestions"
+                  >
+                    {speciesSuggestLoading && speciesSuggestRows.length === 0 ? (
+                      <li className="comm-species-suggest__status" role="presentation">
+                        Searching iNaturalist...
+                      </li>
+                    ) : null}
+                    {speciesSuggestRows.map((row) => (
+                      <li key={row.id} role="presentation">
+                        <button
+                          type="button"
+                          role="option"
+                          className="comm-species-opt"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => onPickSpeciesSuggestion(row)}
+                        >
+                          <span className="comm-species-opt__thumb" aria-hidden>
+                            {row.photoUrl ? (
+                              <img
+                                src={row.photoUrl}
+                                alt=""
+                                className="comm-species-opt__thumb-img"
+                                loading="lazy"
+                                decoding="async"
+                                referrerPolicy="no-referrer"
+                              />
+                            ) : null}
+                          </span>
+                          <span className="comm-species-opt__text">
+                            <span className="comm-species-opt__name">
+                              {row.name}
+                            </span>
+                            {row.matchedTerm &&
+                            row.matchedTerm !== row.name ? (
+                              <span className="comm-species-opt__meta">
+                                {row.matchedTerm}
+                              </span>
+                            ) : null}
+                            <span className="comm-species-opt__meta">
+                              iNaturalist
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
             </label>
           </div>
         </div>
@@ -458,6 +533,47 @@ function CommunityPage() {
   const [postPending, setPostPending] = useState(false);
   const [postStatus, setPostStatus] = useState("");
   const [actionStatus, setActionStatus] = useState("");
+  const [speciesSuggestRows, setSpeciesSuggestRows] = useState([]);
+  const [speciesSuggestLoading, setSpeciesSuggestLoading] = useState(false);
+  const [speciesSuggestOpen, setSpeciesSuggestOpen] = useState(false);
+  const speciesSuggestAbortRef = useRef(null);
+  const speciesSuggestBlurTimerRef = useRef(null);
+
+  useEffect(() => {
+    const q = species.trim();
+    if (q.length < 2) {
+      speciesSuggestAbortRef.current?.abort();
+      setSpeciesSuggestRows([]);
+      setSpeciesSuggestLoading(false);
+      return undefined;
+    }
+    setSpeciesSuggestLoading(true);
+    const t = window.setTimeout(async () => {
+      speciesSuggestAbortRef.current?.abort();
+      const ac = new AbortController();
+      speciesSuggestAbortRef.current = ac;
+      try {
+        const rows = await taxaAutocomplete(q, ac.signal);
+        if (ac.signal.aborted) return;
+        setSpeciesSuggestRows(
+          rows.slice(0, 10).map((r) => ({
+            id: r.id,
+            name: r.name || r.matched_term || "Unknown",
+            matchedTerm: r.matched_term || "",
+            photoUrl: taxonPhotoUrl(r),
+          })),
+        );
+      } catch {
+        if (!ac.signal.aborted) setSpeciesSuggestRows([]);
+      } finally {
+        if (!ac.signal.aborted) setSpeciesSuggestLoading(false);
+      }
+    }, 280);
+    return () => {
+      window.clearTimeout(t);
+      speciesSuggestAbortRef.current?.abort();
+    };
+  }, [species]);
 
   const loadFeed = async () => {
     setFeedLoading(true);
@@ -473,7 +589,15 @@ function CommunityPage() {
         },
         token,
       );
-      setFeed((data.posts || []).map(normalizeFeedPost));
+      const normalized = (data.posts || []).map(normalizeFeedPost);
+      const withPictures = normalized.filter((p) => Boolean(p.imageUrl));
+      withPictures.sort((a, b) => {
+        const aPref = isPreferredMarineSpecies(a.species) ? 1 : 0;
+        const bPref = isPreferredMarineSpecies(b.species) ? 1 : 0;
+        if (aPref !== bPref) return bPref - aPref;
+        return Date.parse(b.createdAt || "") - Date.parse(a.createdAt || "");
+      });
+      setFeed(withPictures);
     } catch (err) {
       setFeed([]);
       setFeedError(err instanceof Error ? err.message : "Failed to load feed");
@@ -505,25 +629,29 @@ function CommunityPage() {
       setPostStatus("Add a caption before posting.");
       return;
     }
+    if (!photoFile) {
+      setPostStatus("Please add a photo. Community feed is set to image posts only.");
+      return;
+    }
     setPostPending(true);
     try {
       let imageS3Key = null;
-      if (photoFile) {
-        try {
-          const presign = await presignCommunityMedia(photoFile, token);
-          await uploadFileToPresignedUrl(
-            presign.upload_url,
-            photoFile,
-            presign.headers || {},
-          );
-          imageS3Key = presign.object_key;
-        } catch (uploadErr) {
-          setPostStatus(
-            uploadErr instanceof Error
-              ? `Photo upload failed (${uploadErr.message}). Posting without photo.`
-              : "Photo upload failed. Posting without photo.",
-          );
-        }
+      try {
+        const presign = await presignCommunityMedia(photoFile, token);
+        await uploadFileToPresignedUrl(
+          presign.upload_url,
+          photoFile,
+          presign.headers || {},
+        );
+        imageS3Key = presign.object_key;
+      } catch (uploadErr) {
+        setPostStatus(
+          uploadErr instanceof Error
+            ? `Photo upload failed (${uploadErr.message}).`
+            : "Photo upload failed.",
+        );
+        setPostPending(false);
+        return;
       }
 
       const created = await createCommunityPost(
@@ -541,9 +669,23 @@ function CommunityPage() {
         },
         token,
       );
-      setFeed((prev) => [normalizeFeedPost(created), ...prev]);
+      const normalized = normalizeFeedPost(created);
+      if (normalized.imageUrl) {
+        setFeed((prev) => {
+          const next = [normalized, ...prev].filter((p) => Boolean(p.imageUrl));
+          next.sort((a, b) => {
+            const aPref = isPreferredMarineSpecies(a.species) ? 1 : 0;
+            const bPref = isPreferredMarineSpecies(b.species) ? 1 : 0;
+            if (aPref !== bPref) return bPref - aPref;
+            return Date.parse(b.createdAt || "") - Date.parse(a.createdAt || "");
+          });
+          return next;
+        });
+      }
       setDraft("");
       setSpecies("");
+      setSpeciesSuggestRows([]);
+      setSpeciesSuggestOpen(false);
       setLocationId("");
       setWhenLocal("");
       setVisibility("");
@@ -645,6 +787,24 @@ function CommunityPage() {
     setDraft,
     species,
     setSpecies,
+    speciesSuggestRows,
+    speciesSuggestLoading,
+    speciesSuggestOpen,
+    onPickSpeciesSuggestion: (row) => {
+      setSpecies(row.name || row.matchedTerm || "");
+      setSpeciesSuggestOpen(false);
+    },
+    onSpeciesFocus: () => {
+      window.clearTimeout(speciesSuggestBlurTimerRef.current);
+      setSpeciesSuggestOpen(true);
+    },
+    onSpeciesBlur: () => {
+      window.clearTimeout(speciesSuggestBlurTimerRef.current);
+      speciesSuggestBlurTimerRef.current = window.setTimeout(
+        () => setSpeciesSuggestOpen(false),
+        200,
+      );
+    },
     locationId,
     setLocationId,
     whenLocal,

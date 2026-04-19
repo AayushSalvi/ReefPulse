@@ -65,7 +65,10 @@ def _sagemaker_dict_to_response(req: SpeciesRankRequest, raw: dict[str, Any]) ->
     preds_raw = raw.get("predictions")
     if not isinstance(preds_raw, list) or not preds_raw:
         raise ValueError("SageMaker response missing predictions")
-    top_k = min(10, max(1, req.top_k))
+    top_k = min(100, max(1, req.top_k))
+    req_lat = float(req.latitude if req.latitude is not None else 0.0)
+    req_lng = float(req.longitude if req.longitude is not None else 0.0)
+    req_location = req.location or f"{req_lat:.4f}, {req_lng:.4f}"
     predictions: list[SpeciesPrediction] = []
     for p in preds_raw[:top_k]:
         if not isinstance(p, dict):
@@ -79,9 +82,9 @@ def _sagemaker_dict_to_response(req: SpeciesRankRequest, raw: dict[str, Any]) ->
             SpeciesPrediction(
                 species=str(species),
                 encounter_probability=round(prob, 4),
-                taxon_id=int(p.get("taxon_id", 0) or 0),
+                taxon_id=str(p.get("taxon_id", "") or ""),
                 rarity=str(p.get("rarity", "common")),
-                safety=str(p.get("safety", "ok")),
+                safety=p.get("safety", "ok"),
                 label=str(p.get("label", "")),
                 rarity_flag=bool(p.get("rarity_flag", False)),
                 safety_flag=str(p.get("safety_flag", "ok")),
@@ -102,12 +105,12 @@ def _sagemaker_dict_to_response(req: SpeciesRankRequest, raw: dict[str, Any]) ->
         f"Species ranked via SageMaker endpoint `{endpoint_name}` ({model_registry.SPECIES_FISH_RANKED})."
     )
     return SpeciesRankResponse(
-        location=req.location,
+        location=req_location,
         model_source=model_source,
         predictions=predictions,
         query={
-            "latitude": req.latitude,
-            "longitude": req.longitude,
+            "latitude": req_lat,
+            "longitude": req_lng,
             **q,
         },
         model=dict(model_meta),
@@ -117,11 +120,13 @@ def _sagemaker_dict_to_response(req: SpeciesRankRequest, raw: dict[str, Any]) ->
 
 def rank_species_with_sagemaker_fallback(req: SpeciesRankRequest) -> SpeciesRankResponse:
     """* Tries SageMaker (same payload as GET Model D); falls back to deterministic demo."""
-    top_k = min(10, max(1, req.top_k))
+    top_k = min(100, max(1, req.top_k))
+    lat = float(req.latitude if req.latitude is not None else 0.0)
+    lng = float(req.longitude if req.longitude is not None else 0.0)
     try:
         raw = species_service.ranked_species_near(
-            latitude=req.latitude,
-            longitude=req.longitude,
+            latitude=lat,
+            longitude=lng,
             observation_date=_observation_date_str(req),
             top_k=top_k,
         )
@@ -139,14 +144,16 @@ def rank_species_with_sagemaker_fallback(req: SpeciesRankRequest) -> SpeciesRank
 
 def rank_species(req: SpeciesRankRequest) -> SpeciesRankResponse:
     """Score catalog species from lat/lon + optional state vector; return top_k sorted."""
-    top_k = min(10, max(1, req.top_k))
-    lat, lon = req.latitude, req.longitude
+    top_k = min(100, max(1, req.top_k))
+    lat = float(req.latitude if req.latitude is not None else 0.0)
+    lon = float(req.longitude if req.longitude is not None else 0.0)
+    location_label = req.location or f"{lat:.4f}, {lon:.4f}"
     jitter = _state_jitter(req.state_vector)
 
     scored: list[tuple[float, dict[str, object]]] = []
     for row in _SPECIES_CATALOG:
         name = str(row["species"])
-        base = _digest_floats(req.location, lat, lon, name) * 0.55 + 0.2
+        base = _digest_floats(location_label, lat, lon, name) * 0.55 + 0.2
         seasonal = 0.08 * math.sin((lat + lon) * 0.01 + len(name) * 0.07)
         p = min(0.97, max(req.min_probability + 0.02, base + seasonal + jitter))
         scored.append((p, row))
@@ -183,7 +190,7 @@ def rank_species(req: SpeciesRankRequest) -> SpeciesRankResponse:
         notes.append(f"observed_date={req.observed_date} (metadata only in demo).")
 
     return SpeciesRankResponse(
-        location=req.location,
+        location=location_label,
         model_source="deterministic-demo-v1",
         predictions=predictions,
         query={

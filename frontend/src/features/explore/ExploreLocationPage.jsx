@@ -13,7 +13,6 @@ import {
   taxaAutocomplete,
 } from "../../api/inaturalist";
 import {
-  getSpeciesRankByCoordinates,
   postSpeciesRank,
 } from "../../api/speciesRank";
 import {
@@ -106,23 +105,6 @@ const HAS_GOOGLE_IMAGE_FALLBACK_CONFIG = Boolean(
   import.meta.env.VITE_GOOGLE_CSE_API_KEY && import.meta.env.VITE_GOOGLE_CSE_ID,
 );
 
-function seasonFromMonth() {
-  const m = new Date().getMonth();
-  if (m < 2 || m === 11) return "winter";
-  if (m < 5) return "spring";
-  if (m < 8) return "summer";
-  return "fall";
-}
-
-function stateVectorFromLocation(loc) {
-  return [
-    Math.round((((loc.waterTempF - 32) * (5 / 9)) / 25) * 1000) / 1000,
-    Math.round((loc.waveFt / 8) * 1000) / 1000,
-    Math.round((loc.windMph / 35) * 1000) / 1000,
-    Math.round((loc.safetyIndex / 100) * 1000) / 1000,
-  ];
-}
-
 function normalizedName(value) {
   return String(value || "")
     .toLowerCase()
@@ -180,17 +162,10 @@ function ExploreLocationPage() {
     const rankLng = usingMapCoords ? mapLng : location.lng;
     const date = new Date().toISOString().slice(0, 10);
     const body = {
-      location: location.name,
       latitude: rankLat,
       longitude: rankLng,
-      season: seasonFromMonth(),
-      state_vector: stateVectorFromLocation(location),
       top_k: 10,
       observed_date: date,
-      image_count: 0,
-      temperature: Math.round((location.waterTempF - 32) * (5 / 9) * 10) / 10,
-      min_probability: 0,
-      rarity: "",
     };
     // #region agent log
     agentDebugLog(
@@ -204,13 +179,7 @@ function ExploreLocationPage() {
       },
     );
     // #endregion
-    getSpeciesRankByCoordinates({
-      locationSlug: location.id,
-      latitude: rankLat,
-      longitude: rankLng,
-      topK: 10,
-      date,
-    })
+    postSpeciesRank(body)
       .then((data) => {
         const rawPredictions = Array.isArray(data?.predictions)
           ? data.predictions
@@ -256,37 +225,6 @@ function ExploreLocationPage() {
         // #region agent log
         agentDebugLog(
           "H1",
-          "ExploreLocationPage.jsx:rank:warn",
-          "Coordinate GET failed, trying POST compatibility",
-          {
-            error: err instanceof Error ? err.message : String(err),
-            usingMapCoords,
-          },
-        );
-        // #endregion
-        return postSpeciesRank(body);
-      })
-      .then((fallbackData) => {
-        if (!fallbackData) return;
-        // #region agent log
-        agentDebugLog(
-          "H1",
-          "ExploreLocationPage.jsx:rank:post-success",
-          "POST fallback rank success",
-          {
-            hasPredictions: Array.isArray(fallbackData?.predictions),
-            predictionCount: Array.isArray(fallbackData?.predictions)
-              ? fallbackData.predictions.length
-              : null,
-          },
-        );
-        // #endregion
-        if (!cancelled) setRankPayload(fallbackData);
-      })
-      .catch((err) => {
-        // #region agent log
-        agentDebugLog(
-          "H1",
           "ExploreLocationPage.jsx:rank:error",
           "Rank request failed",
           {
@@ -306,7 +244,7 @@ function ExploreLocationPage() {
     return () => {
       cancelled = true;
     };
-  }, [location]);
+  }, [location, usingMapCoords, mapLat, mapLng]);
 
   useEffect(() => {
     const preds = rankPayload?.predictions;
@@ -586,16 +524,12 @@ function ExploreLocationPage() {
             const types = tcgTypesFromName(item.name);
             const encounterPct = item.encounterPct;
             const dexLine = hint.length > 118 ? `${hint.slice(0, 116)}…` : hint;
-            const barLabel = item.tierLabel
-              ? `Rank ${item.rank}/10 · ${item.tierLabel}`
-              : `Rank ${item.rank}/10`;
-
             return (
               <Link
                 key={item.id}
                 to="/marine-life"
                 className={`poke-card poke-card--tone-${tone.key}`}
-                aria-label={`${item.name}, rank ${item.rank} of 10`}
+                aria-label={`${item.name}, rank ${item.rank}`}
               >
                 <div
                   className={`poke-card__shine ${tone.key === "magenta" ? "poke-card__shine--on" : ""}`}
@@ -603,9 +537,7 @@ function ExploreLocationPage() {
                 />
                 <div className="poke-card__frame">
                   <div className="poke-card__rank-strip" aria-hidden>
-                    <span className="poke-card__rank-hash">#</span>
                     <span className="poke-card__rank-num">{item.rank}</span>
-                    <span className="poke-card__rank-of">/10</span>
                   </div>
                   <div className="poke-card__top">
                     <span className="poke-card__name">{item.name}</span>
@@ -632,31 +564,8 @@ function ExploreLocationPage() {
                     ) : null}
                   </div>
                   <p className="poke-card__dex">{dexLine}</p>
-                  <div className="poke-card__bar">
-                    <span className="poke-card__rarity">{barLabel}</span>
-                    <span className="poke-card__retreat">
-                      Retreat <span className="poke-card__energy" />{" "}
-                      <span className="poke-card__energy" />
-                    </span>
-                  </div>
-                  <dl className="poke-card__stats">
-                    <div>
-                      <dt>Encounter</dt>
-                      <dd>{encounterPct}%</dd>
-                    </div>
-                    <div>
-                      <dt>Waves</dt>
-                      <dd>{location.waveFt} ft</dd>
-                    </div>
-                  </dl>
-                  {item.safety ? (
-                    <p className="poke-card__fine">safety: {item.safety}</p>
-                  ) : (
-                    <p className="poke-card__fine">
-                      weakness: surge · resistance: patience · retreat cost:
-                      common sense
-                    </p>
-                  )}
+                  <p className="poke-card__prob-label">Encounter probability</p>
+                  <p className="poke-card__prob">{encounterPct}%</p>
                 </div>
               </Link>
             );

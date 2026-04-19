@@ -117,7 +117,7 @@
 
 .dash-beach-band__pill--moderate {
   background: rgba(251, 191, 36, 0.25);
-  color: #f47e24;
+  color: #b45309;
 }
 
 .dash-beach-band__pill--poor,
@@ -130,7 +130,7 @@
   margin: 0 0 0.65rem;
   padding-left: 1.1rem;
   font-size: 0.8rem;
-  color: #f7720d;
+  color: #b45309;
   line-height: 1.4;
 }
 
@@ -537,14 +537,14 @@
 
 .dash-verdict--caution {
   background: #fffbeb;
-  color: #f77ea8;
+  color: #92400e;
   border: 1px solid #fde68a;
 }
 
 .dash-verdict--bad {
   background: #fef2f2;
-  color: #c9309e;
-  border: 1px solid #fecadb;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
 }
 
 /* Condition meters */

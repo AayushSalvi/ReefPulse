@@ -31,3 +31,4 @@ class ModelAForecastResponse(BaseModel):
     horizon_days: int = 14
     channels: list[str]
     station_id: str | None = None
+    model_source: str | None = None

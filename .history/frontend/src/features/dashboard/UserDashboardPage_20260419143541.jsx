@@ -99,7 +99,7 @@ function SafetyGauge({ value, surface = "dark" }) {
     ? v >= 82
       ? "#0f766e"
       : v >= 72
-        ? "#D9F274"
+        ? "#d97706"
         : "#dc2626"
     : v >= 82
       ? "#dfff4f"
@@ -633,7 +633,9 @@ function UserDashboardPage() {
             >
               {verdict.label}
             </div>
-
+            <p className="dash-panel__muted dash-panel__muted--emph">
+              {outlookLine}
+            </p>
             {fusion?.narrative ? (
               <p className="dash-panel__muted dash-panel__muted--emph">
                 {fusion.narrative}

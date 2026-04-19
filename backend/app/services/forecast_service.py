@@ -58,6 +58,7 @@ def forecast_model_a(body: ModelAForecastRequest) -> ModelAForecastResponse:
         horizon_days=out["horizon_days"],
         channels=out["channels"],
         station_id=body.station_id,
+        model_source="local-checkpoint:model-a" if settings.model_a_artifact_path else "model-a-unconfigured",
     )
 
 

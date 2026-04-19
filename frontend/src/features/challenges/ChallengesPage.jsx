@@ -9,8 +9,6 @@ import {
   challenges,
   challengeThemes,
   currentTrophyTier,
-  demoChallengeCounts,
-  demoTrophyPoints,
   getDemoLeaderboardSlice,
   getDemoTrophyComparison,
   nextTrophyTier,
@@ -20,7 +18,28 @@ import { ChallengeCardIcon, TrophyTierIcon } from "./challengeIcons";
 import "../explore/workflow.css";
 import "./challenges.css";
 
-function ChallengeCard({ c }) {
+function agentDebugLog(hypothesisId, location, message, data = {}, runId = "run1") {
+  // #region agent log
+  fetch("http://127.0.0.1:7299/ingest/b199d9fc-ddef-4145-9d59-b0f1ee99e6b6", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Debug-Session-Id": "ddf9dc",
+    },
+    body: JSON.stringify({
+      sessionId: "ddf9dc",
+      runId,
+      hypothesisId,
+      location,
+      message,
+      data,
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+  // #endregion
+}
+
+function ChallengeCard({ c, onComplete }) {
   return (
     <article className={`ch-card ${c.completed ? "is-complete" : ""}`}>
       <div className="ch-card__banner">
@@ -48,8 +67,13 @@ function ChallengeCard({ c }) {
         </div>
         <div className="ch-card__footer">
           <span className="ch-card__points">+{c.points} trophy pts</span>
-          <button type="button" className={`challenges-btn ${c.completed ? "" : "challenges-btn--primary"}`} disabled={c.completed}>
-            {c.completed ? "Badge earned" : "Log progress (demo)"}
+          <button
+            type="button"
+            className={`challenges-btn ${c.completed ? "" : "challenges-btn--primary"}`}
+            disabled={c.completed}
+            onClick={() => onComplete(c.id)}
+          >
+            {c.completed ? "Completed" : "Complete"}
           </button>
         </div>
       </div>
@@ -59,13 +83,35 @@ function ChallengeCard({ c }) {
 
 function ChallengesPage() {
   const [theme, setTheme] = useState("all");
-  const points = useMemo(() => demoTrophyPoints(), []);
+  const [challengeList, setChallengeList] = useState(() =>
+    challenges.map((c) => ({ ...c })),
+  );
+  const [completionBonusPoints, setCompletionBonusPoints] = useState(0);
+  const points = useMemo(
+    () =>
+      challengeList
+        .filter((c) => c.completed)
+        .reduce((sum, c) => sum + c.points, 0) + completionBonusPoints,
+    [challengeList, completionBonusPoints],
+  );
   const tier = useMemo(() => currentTrophyTier(points), [points]);
   const nextTier = useMemo(() => nextTrophyTier(points), [points]);
-  const counts = useMemo(() => demoChallengeCounts(), []);
+  const counts = useMemo(() => {
+    const completed = challengeList.filter((c) => c.completed).length;
+    const inProgress = challengeList.filter(
+      (c) => !c.completed && c.progressPct > 0,
+    ).length;
+    const notStarted = challengeList.filter(
+      (c) => !c.completed && c.progressPct === 0,
+    ).length;
+    return { completed, inProgress, notStarted, total: challengeList.length };
+  }, [challengeList]);
   const comparison = useMemo(() => getDemoTrophyComparison(points), [points]);
   const badgesEarned = counts.completed;
-  const leaderboardRows = useMemo(() => getDemoLeaderboardSlice(points, badgesEarned), [points, badgesEarned]);
+  const leaderboardRows = useMemo(
+    () => getDemoLeaderboardSlice(points, badgesEarned),
+    [points, badgesEarned],
+  );
 
   const nextTierProgressPct = useMemo(() => {
     if (!nextTier) return 100;
@@ -77,9 +123,31 @@ function ChallengesPage() {
   const ptsToNextTier = nextTier ? Math.max(0, nextTier.minPoints - points) : 0;
 
   const filtered = useMemo(() => {
-    if (theme === "all") return challenges;
-    return challenges.filter((c) => c.theme === theme);
-  }, [theme]);
+    if (theme === "all") return challengeList;
+    return challengeList.filter((c) => c.theme === theme);
+  }, [theme, challengeList]);
+
+  const handleComplete = (challengeId) => {
+    setChallengeList((prev) =>
+      prev.map((c) =>
+        c.id === challengeId && !c.completed
+          ? { ...c, completed: true, progressPct: 100 }
+          : c,
+      ),
+    );
+    setCompletionBonusPoints((prev) => prev + 10);
+    // #region agent log
+    agentDebugLog(
+      "H8",
+      "ChallengesPage.jsx:complete",
+      "Challenge marked complete and bonus applied",
+      {
+        challengeId,
+        bonusAdded: 10,
+      },
+    );
+    // #endregion
+  };
 
   return (
     <div className="challenges-page wf-page">
@@ -188,7 +256,7 @@ function ChallengesPage() {
 
         <div className="ch-grid">
           {filtered.map((c) => (
-            <ChallengeCard key={c.id} c={c} />
+            <ChallengeCard key={c.id} c={c} onComplete={handleComplete} />
           ))}
         </div>
       </div>

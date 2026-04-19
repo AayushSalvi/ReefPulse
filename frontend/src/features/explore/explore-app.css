@@ -643,7 +643,7 @@
 .poke-card__rank-strip {
   display: flex;
   align-items: baseline;
-  gap: 0.06rem;
+  gap: 0;
   margin-bottom: 0.3rem;
 }
 
@@ -663,10 +663,26 @@
 }
 
 .poke-card__rank-num {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 900;
   line-height: 1;
   letter-spacing: -0.03em;
+}
+
+.poke-card__prob-label {
+  margin: 0.1rem 0 0;
+  font-size: 0.56rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.poke-card__prob {
+  margin: 0.12rem 0 0;
+  font-size: 1.2rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #1b254b;
 }
 
 .poke-card__rank-of {

@@ -99,7 +99,7 @@ function SafetyGauge({ value, surface = "dark" }) {
     ? v >= 82
       ? "#0f766e"
       : v >= 72
-        ? "#D9F274"
+        ? "#d97706"
         : "#dc2626"
     : v >= 82
       ? "#dfff4f"
@@ -530,6 +530,16 @@ function UserDashboardPage() {
             <code className="dash-inline-code">VITE_API_BASE_URL</code>.
           </p>
         ) : null}
+        {fusion && !fusionError ? (
+          <p
+            className="dash-dash-head__api dash-dash-head__api--ok"
+            role="status"
+          >
+            Activity safety index is <strong>live</strong> from the API. Model A
+            ocean features are shown in dash vitals when checkpoint is
+            configured.
+          </p>
+        ) : null}
         <ul
           className="dash-dash-head__acts"
           aria-label="Activity coverage in this demo"
@@ -633,7 +643,9 @@ function UserDashboardPage() {
             >
               {verdict.label}
             </div>
-
+            <p className="dash-panel__muted dash-panel__muted--emph">
+              {outlookLine}
+            </p>
             {fusion?.narrative ? (
               <p className="dash-panel__muted dash-panel__muted--emph">
                 {fusion.narrative}
