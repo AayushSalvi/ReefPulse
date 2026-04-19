@@ -29,7 +29,8 @@ htmlcov/
 *.pt
 *.parquet
 backend/model_a_data/
-data/
+# Repo-root data only (do not ignore frontend/src/data mock fixtures)
+/data/
 tmp/
 logs/
 *.sqlite3

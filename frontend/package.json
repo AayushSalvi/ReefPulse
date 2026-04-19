@@ -1,0 +1,10 @@
+{
+  "name": "reefpulse-frontend-workspace",
+  "private": true,
+  "description": "Run scripts from repo root `frontend/` — they delegate to `src/` where Vite + dependencies live.",
+  "scripts": {
+    "dev": "npm run dev --prefix src",
+    "build": "npm run build --prefix src",
+    "preview": "npm run preview --prefix src"
+  }
+}

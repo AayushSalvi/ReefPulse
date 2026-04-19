@@ -7,6 +7,7 @@
  *   features/explore/       → `/explore`, `/explore/:locationId` location workspace + tabs
  *   features/marine-life/     → `/marine-life` species-first discovery
  *   features/community/     → `/community` posts & feed
+ *   features/challenges/    → `/challenges` goals, badges, trophies
  *   features/saved/         → `/saved` alerts & saved places
  *   features/legacy/        → `/location/:id` redirects to Explore
  *   features/standalone/    → NOT routed here; optional admin / forecast UIs for future routes
@@ -15,6 +16,7 @@
  */
 import { Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
+import ChallengesPage from "./features/challenges/ChallengesPage";
 import CommunityPage from "./features/community/CommunityPage";
 import ExploreForecastRedirect from "./features/explore/ExploreForecastRedirect";
 import ExploreIndexPage from "./features/explore/ExploreIndexPage";
@@ -44,6 +46,7 @@ function App() {
         <Route path="/marine-life" element={<MarineLifeDiscoveryPage />} />
         <Route path="/dashboard" element={<UserDashboardPage />} />
         <Route path="/community" element={<CommunityPage />} />
+        <Route path="/challenges" element={<ChallengesPage />} />
         <Route path="/saved" element={<SavedPlacesPage />} />
 
         {/* —— Back-compat deep links —— */}

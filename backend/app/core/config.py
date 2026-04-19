@@ -25,6 +25,32 @@ class Settings(BaseSettings):
     model_b_threshold: float = 0.15
     model_b_high_threshold: float = 0.25
     model_b_local_artifact: Path = Path("backend/training/model_b/artifacts/model_b_stats.json")
+    database_url: str = Field(
+        default="sqlite:///./reefpulse.db",
+        description="SQLAlchemy URL, e.g. sqlite:///./reefpulse.db or postgresql+psycopg://user:pass@host:5432/reefpulse",
+    )
+    create_tables_on_startup: bool = Field(
+        default=True,
+        description="If true, run Base.metadata.create_all on startup (dev). Prefer migrations in production.",
+    )
+    jwt_secret: str = Field(
+        default="change-me-in-production-use-long-random-secret",
+        description="HS256 secret for Bearer tokens (sub = user UUID).",
+    )
+    jwt_algorithm: str = "HS256"
+    community_upload_max_bytes: int = Field(
+        default=8_388_608,
+        description="Max declared size for a single community image upload (presign).",
+    )
+    community_upload_allowed_content_types: str = Field(
+        default="image/jpeg,image/png,image/webp",
+        description="Comma-separated MIME types allowed for community image presign.",
+    )
+    community_s3_key_prefix: str = Field(
+        default="community/uploads",
+        description="S3 key prefix for presigned uploads; keys must be {prefix}/{user_id}/...",
+    )
+    community_presign_ttl_seconds: int = Field(default=3600, ge=60, le=86400)
 
     model_config = SettingsConfigDict(
         env_file=".env",
