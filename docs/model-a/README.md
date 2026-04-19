@@ -46,9 +46,10 @@ python scripts/launch_model_a_sagemaker_training.py \
   --region us-east-1 \
   --s3-train-channel s3://YOUR_BUCKET/model-a/ \
   --output-path s3://YOUR_BUCKET/model-a/sagemaker-output/ \
-  --instance-type ml.g4dn.xlarge \
   --epochs 20
 ```
+
+The launcher defaults to **`ml.m5.xlarge` (CPU)** so new accounts are not blocked by **zero GPU quota**. For faster training, request a quota for **`ml.g4dn.xlarge` for training job usage`** in **AWS Service Quotas** (or Support), then run with `--instance-type ml.g4dn.xlarge`.
 
 **On your laptop**, add `--role arn:aws:iam::ACCOUNT:role/YOUR_SAGEMAKER_ROLE`.
 

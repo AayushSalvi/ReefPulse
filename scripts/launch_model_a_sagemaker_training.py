@@ -12,8 +12,10 @@ Example (train.npz + val.npz in the same S3 prefix, e.g. model-a/):
     --region us-east-1 \\
     --s3-train-channel s3://reefpulse-calcofi-data/model-a/ \\
     --output-path s3://reefpulse-calcofi-data/model-a/sagemaker-output/ \\
-    --instance-type ml.g4dn.xlarge \\
     --epochs 20
+
+Default instance is CPU (ml.m5.xlarge). For GPU, pass e.g. --instance-type ml.g4dn.xlarge
+after raising your quota in Service Quotas.
 
 The S3 prefix for --s3-train-channel must contain train.npz and val.npz.
 """
@@ -45,7 +47,11 @@ def main() -> None:
         required=True,
         help="S3 URI where job model.tar.gz and artifacts are written.",
     )
-    parser.add_argument("--instance-type", default="ml.g4dn.xlarge")
+    parser.add_argument(
+        "--instance-type",
+        default="ml.m5.xlarge",
+        help="CPU default avoids zero GPU quotas. Use ml.g4dn.xlarge after quota increase.",
+    )
     parser.add_argument("--job-name", default=None, help="Optional training job name prefix")
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--batch-size", type=int, default=128)
