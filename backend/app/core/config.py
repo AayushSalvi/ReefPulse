@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     s3_bucket: str = "reefpulse-dev"
     sagemaker_endpoint_forecast: str = "forecast-endpoint"
     sagemaker_endpoint_hab: str = "hab-endpoint"
-    sagemaker_endpoint_species: str = "species-endpoint"
+    sagemaker_endpoint_species: str = "fish-sd-top100"
     sns_topic_arn: str | None = None
 
     model_config = SettingsConfigDict(
