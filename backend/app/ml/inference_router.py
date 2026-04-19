@@ -1,9 +1,11 @@
-﻿"""SageMaker real-time inference helpers."""
+"""Route inference (Model A local / SageMaker JSON); extend per endpoint type."""
 
 from __future__ import annotations
 
 import json
 from typing import Any
+
+from app.ml.model_a.inference import load_forecaster
 
 
 def invoke_sagemaker_json(
@@ -22,3 +24,6 @@ def invoke_sagemaker_json(
     body = response["Body"].read().decode("utf-8")
     parsed: dict[str, Any] = json.loads(body)
     return parsed
+
+
+__all__ = ["invoke_sagemaker_json", "load_forecaster"]

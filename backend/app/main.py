@@ -1,16 +1,51 @@
-﻿from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
-from app.api.routes import alerts, chat, forecast, health, safety, species
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.api.routes import alerts, anomaly, auth, chat, challenges, community, forecast, health, safety, species
 from app.core.config import settings
+from app.db.base import Base
+from app.db.seed import seed_if_empty
+from app.db.session import SessionLocal, engine
+from app.db.sqlite_migrate import apply_sqlite_user_auth_columns
+from app.db.sqlite_fts import rebuild_posts_fts
 
-app = FastAPI(title=settings.app_name)
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    if settings.create_tables_on_startup:
+        Base.metadata.create_all(bind=engine)
+        apply_sqlite_user_auth_columns(engine)
+        with SessionLocal() as session:
+            seed_if_empty(session)
+            session.commit()
+        rebuild_posts_fts(engine)
+    yield
+
+
+app = FastAPI(title=settings.app_name, lifespan=lifespan)
+
+_origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
+if _origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 app.include_router(health.router, prefix=settings.api_prefix)
+app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(forecast.router, prefix=settings.api_prefix)
 app.include_router(safety.router, prefix=settings.api_prefix)
 app.include_router(species.router, prefix=settings.api_prefix)
+app.include_router(anomaly.router, prefix=settings.api_prefix)
 app.include_router(alerts.router, prefix=settings.api_prefix)
 app.include_router(chat.router, prefix=settings.api_prefix)
+app.include_router(community.router, prefix=settings.api_prefix)
+app.include_router(challenges.router, prefix=settings.api_prefix)
 
 
 @app.get("/")

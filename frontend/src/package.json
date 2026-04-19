@@ -1,0 +1,9 @@
+{
+  "name": "reefpulse-frontend-src",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix ..",
+    "build": "npm run build --prefix ..",
+    "preview": "npm run preview --prefix .."
+  }
+}

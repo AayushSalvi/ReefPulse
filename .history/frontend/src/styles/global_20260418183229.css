@@ -1,0 +1,230 @@
+/*
+ * ReefPulse — global styles (loaded once from main.jsx).
+ * Page-specific styles live next to each feature under src/features/<name>/*.css
+ */
+:root {
+  --rp-navy: #292f69;
+  --rp-navy-deep: #121a36;
+  --rp-lime: #faff6c;
+  --rp-lime-soft: #e8ff7a;
+  --rp-surface: #eef2fb;
+  --rp-white: #ffffff;
+  --rp-muted: #8b9bb8;
+  font-family:
+    Manrope,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Manrope,
+    sans-serif;
+  color: #152238;
+  background: var(--rp-surface);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* —— Global top navigation (single row: brand | links | icon tools) —— */
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.5rem 1.25rem;
+  padding: 0.5rem clamp(1rem, 4vw, 2.5rem);
+  background: var(--rp-navy);
+}
+
+.top-nav-brand {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--rp-lime);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.top-nav-brand:hover {
+  color: var(--rp-lime-soft);
+}
+
+.top-nav-tools {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+
+.top-nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 10px;
+  color: #faff6c;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.top-nav-icon:hover {
+  border-color: rgba(223, 255, 79, 0.45);
+  color: #fff;
+}
+
+.top-nav-icon.is-active {
+  color: var(--rp-lime);
+  border-color: rgba(223, 255, 79, 0.55);
+  background: rgba(223, 255, 79, 0.08);
+}
+
+.top-nav-links {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 0.1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.top-nav-link {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #faff6c;
+  text-decoration: none;
+  padding: 0.35rem 0.15rem;
+  border-radius: 4px 4px 0 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.top-nav-link:hover {
+  color: var(--rp-white);
+}
+
+.top-nav-link.is-active {
+  color: var(--rp-white);
+  border-bottom-color: var(--rp-lime);
+}
+
+.page-content {
+  flex: 1;
+}
+
+.page-content--bleed {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.page-content--app {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding: clamp(1rem, 3vw, 1.75rem) clamp(1rem, 4vw, 2rem) 2.5rem;
+  background: var(--rp-surface);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Shared inner-page chrome */
+.rp-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.rp-breadcrumb a {
+  color: var(--rp-navy);
+  text-decoration: none;
+}
+
+.rp-breadcrumb a:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.rp-breadcrumb-sep {
+  color: #cbd5e1;
+  user-select: none;
+}
+
+.rp-page-title {
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--rp-navy) 0%, #2a3766 100%);
+  color: var(--rp-white);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.rp-page-title h1 {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.25rem, 3vw, 1.6rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--rp-lime);
+}
+
+.rp-page-title p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 500;
+}
+
+.lead {
+  color: #37506c;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.two-col {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.panel {
+  background: #fff;
+  border: 1px solid #dce8f5;
+  border-radius: 12px;
+  padding: 1rem;
+}

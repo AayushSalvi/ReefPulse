@@ -1,0 +1,599 @@
+/* ReefPulse — Challenges (goal cards + trophy shelf) */
+
+.challenges-page {
+  --ch-radius: 12px;
+  --ch-border: rgba(27, 37, 75, 0.08);
+  --ch-muted: #64748b;
+  max-width: 1080px;
+}
+
+.challenges-breadcrumb {
+  margin-bottom: 0.35rem;
+}
+
+.challenges-hero {
+  margin-bottom: 1rem;
+}
+
+.challenges-hero h1 {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.35rem, 2.5vw, 1.6rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--rp-navy, #1b254b);
+}
+
+.challenges-hero__lead {
+  margin: 0;
+  max-width: 38rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--ch-muted);
+  font-weight: 500;
+}
+
+.challenges-hero__link {
+  font-weight: 700;
+  color: #0f766e;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.challenges-hero__link:hover {
+  text-decoration: underline;
+}
+
+/* —— Trophy spotlight (above challenge grid) —— */
+.ch-trophy-banner {
+  margin-bottom: 1.15rem;
+  padding: 1rem 1.15rem 1.05rem;
+  border-radius: calc(var(--ch-radius) + 2px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #2b38b8;
+  color: #f1f5f9;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.28);
+}
+
+.ch-trophy-banner__kicker {
+  margin: 0 0 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(223, 255, 79, 0.88);
+}
+
+.ch-trophy-banner__grid {
+  display: grid;
+  gap: 1rem 1.25rem;
+  align-items: end;
+}
+
+@media (min-width: 720px) {
+  .ch-trophy-banner__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 320px);
+    align-items: end;
+  }
+}
+
+.ch-trophy-banner__primary {
+  min-width: 0;
+}
+
+.ch-trophy-banner__score {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+}
+
+.ch-trophy-banner__num {
+  font-size: clamp(2.5rem, 6.5vw, 3.5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: #faff6c;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.25);
+}
+
+.ch-trophy-banner__unit {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #faff6c;
+}
+
+.ch-trophy-banner__tier {
+  margin: 0.55rem 0 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ch-trophy-banner__tier-emoji {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.ch-trophy-banner__tier-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  min-width: 0;
+}
+
+.ch-trophy-banner__tier-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 252, 0.55);
+}
+
+.ch-trophy-banner__tier-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.ch-trophy-banner__season {
+  margin: 0.45rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(248, 250, 252, 0.65);
+}
+
+.ch-trophy-banner__aside {
+  min-width: 0;
+}
+
+.ch-trophy-banner__next-label {
+  margin: 0 0 0.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: rgba(248, 250, 252, 0.82);
+}
+
+.ch-trophy-banner__next-gap {
+  color: rgba(223, 255, 79, 0.92);
+  font-variant-numeric: tabular-nums;
+}
+
+.ch-trophy-banner__bar {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.ch-trophy-banner__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #dfff4f, #faff6c);
+  box-shadow: 0 0 12px rgba(94, 234, 212, 0.45);
+  transition: width 0.35s ease;
+}
+
+.ch-trophy-banner__maxed {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(223, 255, 79, 0.95);
+}
+
+.ch-trophy-banner__stats {
+  list-style: none;
+  margin: 0.85rem 0 0;
+  padding: 0.65rem 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.45rem;
+}
+
+@media (min-width: 520px) {
+  .ch-trophy-banner__stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.ch-trophy-banner__stats li {
+  margin: 0;
+  padding: 0.5rem 0.55rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.ch-trophy-banner__stat-num {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.ch-trophy-banner__stat-label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 252, 0.58);
+}
+
+/* —— Active challenge grid —— */
+.ch-main-block {
+  margin-bottom: 1rem;
+}
+
+.ch-main-block__label {
+  margin: 0 0 0.45rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.ch-main-block .ch-theme-row {
+  margin-bottom: 0.85rem;
+}
+
+/* —— Collapsible depth: tiers + table —— */
+.ch-details {
+  margin-bottom: 1rem;
+  border-radius: var(--ch-radius);
+  border: 1px solid var(--ch-border);
+  background: #fafbfc;
+  overflow: hidden;
+}
+
+.ch-details__summary {
+  padding: 0.55rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--rp-navy, #1b254b);
+  cursor: pointer;
+  list-style-position: outside;
+}
+
+.ch-details__summary:hover {
+  background: rgba(27, 37, 75, 0.04);
+}
+
+.ch-details__body {
+  padding: 0 0.65rem 0.65rem;
+  border-top: 1px solid #f1f5f9;
+  background: #fff;
+}
+
+.ch-tiers-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.65rem 0 0.5rem;
+}
+
+.ch-tier-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+.ch-tier-chip.is-current {
+  border-color: rgba(15, 118, 110, 0.45);
+  background: rgba(223, 255, 79, 0.35);
+  color: var(--rp-navy, #1b254b);
+}
+
+.ch-tier-chip.is-locked {
+  opacity: 0.45;
+}
+
+.ch-tier-chip__name {
+  max-width: 7rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ch-details__cohort {
+  margin: 0 0 0.5rem;
+  font-size: 0.74rem;
+  color: #64748b;
+}
+
+.ch-compare__table-wrap--nested {
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+}
+
+.ch-compare__caption {
+  caption-side: bottom;
+  padding: 0.4rem 0.5rem 0.45rem;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: #94a3b8;
+  text-align: left;
+}
+
+.ch-compare__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.ch-compare__table--compact {
+  font-size: 0.76rem;
+}
+
+.ch-compare__table th,
+.ch-compare__table td {
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ch-compare__table--compact th,
+.ch-compare__table--compact td {
+  padding: 0.35rem 0.5rem;
+}
+
+.ch-compare__table th {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.ch-compare__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ch-compare__table tbody tr.is-you {
+  background: rgba(223, 255, 79, 0.2);
+}
+
+.ch-compare__table tbody tr.is-you td {
+  font-weight: 700;
+  color: var(--rp-navy, #1b254b);
+}
+
+.ch-compare__table td:nth-child(2) {
+  font-variant-numeric: tabular-nums;
+}
+
+.challenges-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: inherit;
+  text-decoration: none;
+  border: 1px solid var(--ch-border);
+  background: #fff;
+  color: var(--rp-navy, #1b254b);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.challenges-btn:hover {
+  background: rgba(27, 37, 75, 0.04);
+  border-color: rgba(27, 37, 75, 0.15);
+}
+
+.challenges-btn--primary {
+  background: var(--rp-navy, #1b254b);
+  color: var(--rp-lime, #dfff4f);
+  border-color: var(--rp-navy-deep, #121a36);
+}
+
+.challenges-btn--primary:hover {
+  background: var(--rp-navy-deep, #121a36);
+  color: #e8ff7a;
+}
+
+/* Theme chips */
+.ch-theme-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.ch-theme-chip {
+  padding: 0.32rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--ch-border);
+  background: #fff;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.ch-theme-chip.is-on {
+  background: var(--rp-navy, #1b254b);
+  color: var(--rp-lime, #dfff4f);
+  border-color: var(--rp-navy, #1b254b);
+}
+
+/* Challenge cards */
+.ch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
+  gap: 0.85rem;
+}
+
+.ch-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--ch-radius);
+  border: 1px solid var(--ch-border);
+  background: #fff;
+  overflow: hidden;
+  transition: box-shadow 0.15s ease;
+}
+
+.ch-card:hover {
+  box-shadow: 0 6px 22px rgba(18, 26, 54, 0.06);
+  border-color: rgba(27, 37, 75, 0.12);
+}
+
+.ch-card__banner {
+  padding: 0.85rem 1rem;
+  min-height: 4.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  background: #d4fc36;
+  color: #292f69;
+}
+
+.ch-card__emoji {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.ch-card__banner-text {
+  min-width: 0;
+}
+
+.ch-card__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.ch-card__meta {
+  margin: 0.2rem 0 0;
+  font-size: 0.7rem;
+  opacity: 0.88;
+  font-weight: 600;
+}
+
+.ch-card__body {
+  padding: 0.85rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  flex: 1;
+}
+
+.ch-card__blurb {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.ch-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #434f0f;
+  background: #e1ebb6;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+.ch-card__progress {
+  margin-top: auto;
+}
+
+.ch-card__progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  margin-bottom: 0.28rem;
+}
+
+.ch-card__progress-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.ch-card__progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0f766e, #dfff4f);
+  transition: width 0.3s ease;
+}
+
+.ch-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ch-card__points {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.challenges-cross {
+  margin-top: 1.25rem;
+  padding: 0.65rem 0;
+  border-top: 1px solid var(--ch-border);
+}
+
+.challenges-cross p {
+  margin: 0;
+  max-width: 38rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.challenges-cross a {
+  color: #0f766e;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.challenges-cross a:hover {
+  text-decoration: underline;
+}
+
+.challenges-footer-links {
+  margin-top: 1.5rem;
+}

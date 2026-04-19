@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# SageMaker training entry: expects hyperparameters and channel "training" with train.npz + val.npz
+# Set SAGEMAKER_PROGRAM or call from container CMD:
+#   python -m app.ml.model_a.train --train-npz /opt/ml/input/data/training/train.npz \
+#        --val-npz /opt/ml/input/data/training/val.npz --out /opt/ml/model/model_A_forecaster.pt
+set -euo pipefail
+TRAIN="${SM_CHANNEL_TRAINING:-/opt/ml/input/data/training}"
+OUT_DIR="${SM_MODEL_DIR:-/opt/ml/model}"
+mkdir -p "$OUT_DIR"
+EPOCHS="${EPOCHS:-25}"
+BATCH_SIZE="${BATCH_SIZE:-128}"
+python -m app.ml.model_a.train \
+  --train-npz "${TRAIN}/train.npz" \
+  --val-npz "${TRAIN}/val.npz" \
+  --out "${OUT_DIR}/model_A_forecaster.pt" \
+  --epochs "${EPOCHS}" \
+  --batch-size "${BATCH_SIZE}"

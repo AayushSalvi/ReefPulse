@@ -1,0 +1,117 @@
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: linear-gradient(165deg, #121a36 0%, #1b254b 45%, #243056 100%);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  border-radius: 16px;
+  background: var(--rp-white, #fff);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+}
+
+.auth-card h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #1b254b;
+}
+
+.auth-card p.sub {
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.auth-form label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.auth-form input:focus {
+  outline: 2px solid #0d9488;
+  outline-offset: 0;
+  border-color: #0d9488;
+}
+
+.auth-form .auth-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.auth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+}
+
+.auth-btn--primary {
+  background: #0f766e;
+  color: #fff;
+}
+
+.auth-btn--primary:hover {
+  background: #0d9488;
+}
+
+.auth-btn--ghost {
+  background: transparent;
+  color: #0f766e;
+  border: 1px solid #99f6e4;
+}
+
+.auth-error {
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.88rem;
+  margin-bottom: 1rem;
+}
+
+.auth-hint {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.auth-hint code {
+  font-size: 0.78rem;
+  background: #f1f5f9;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}

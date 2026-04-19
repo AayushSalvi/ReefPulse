@@ -1,0 +1,3 @@
+# For launching training jobs from your laptop or a small helper environment
+sagemaker>=2.220,<3
+boto3>=1.34

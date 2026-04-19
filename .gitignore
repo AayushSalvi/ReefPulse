@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -18,18 +18,34 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Node / frontend tooling (never commit dependencies or Vite cache)
+node_modules/
+**/.vite/
+
 # Build / reports
 dist/
 build/
 coverage/
 htmlcov/
+*.egg-info/
 
 # AWS SAM
 .aws-sam/
 sam-deploy.log
 
-# Data / local artifacts
-data/
+# Data & ML artifacts (keep in S3; regenerate locally)
+*.npz
+*.pt
+*.parquet
+backend/model_a_data/
+# Repo-root data only (do not ignore frontend/src/data mock fixtures)
+/data/
+
 tmp/
 logs/
 *.sqlite3
+backend/reefpulse.db
+backend/training/model_b/artifacts/baseline/
+backend/training/model_b/artifacts/mooring/
+backend/training/model_b/artifacts/processed/
+backend/training/model_b/artifacts/vae_smoke/
