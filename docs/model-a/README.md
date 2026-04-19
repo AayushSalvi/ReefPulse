@@ -59,6 +59,23 @@ Job output: `model.tar.gz` → extract → `model_A_forecaster.pt`.
 
 ---
 
+## 3b) How good is it? (RMSE / MAE in real units)
+
+1. Download **`model.tar.gz`** from the training job output prefix in S3, unzip → `model_A_forecaster.pt`.
+2. Have **`val.npz`** locally (same file family the job used; or download from `s3://.../model-a/val.npz`).
+3. From **`backend/`** after `pip install -e ".[model-a]"`:
+
+```bash
+python -m app.ml.model_a.eval_checkpoint \
+  --ckpt /path/to/model_A_forecaster.pt \
+  --val-npz /path/to/val.npz \
+  --max-samples 8000
+```
+
+This prints **per-channel RMSE and MAE** over all 14 forecast days (physical units), plus a rough MAPE line. Use `--max-samples 0` to score the full val set (slower).
+
+---
+
 ## 4) Run API locally with a checkpoint
 
 ```bash

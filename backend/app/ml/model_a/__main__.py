@@ -11,6 +11,7 @@ from app.ml.model_a.feature_pipeline import (
     save_npz,
     temporal_train_val_split,
 )
+from app.ml.model_a.eval_checkpoint import run_eval
 from app.ml.model_a.train import train_and_save
 
 
@@ -24,6 +25,15 @@ def cmd_build_windows(args: argparse.Namespace) -> None:
     save_npz(out_dir / "val.npz", val_b)
     print("train windows:", train_b.X.shape, "val:", val_b.X.shape)
     print("wrote:", out_dir / "train.npz", out_dir / "val.npz")
+
+
+def cmd_eval(args: argparse.Namespace) -> None:
+    run_eval(
+        Path(args.ckpt),
+        Path(args.val_npz),
+        batch_size=args.batch_size,
+        max_samples=args.max_samples,
+    )
 
 
 def cmd_train(args: argparse.Namespace) -> None:
@@ -63,6 +73,13 @@ def main() -> None:
     p_train.add_argument("--max-train-samples", type=int, default=None)
     p_train.add_argument("--max-val-samples", type=int, default=None)
     p_train.set_defaults(func=cmd_train)
+
+    p_eval = sub.add_parser("eval", help="RMSE/MAE on val.npz (physical units)")
+    p_eval.add_argument("--ckpt", type=Path, required=True)
+    p_eval.add_argument("--val-npz", type=Path, required=True)
+    p_eval.add_argument("--batch-size", type=int, default=512)
+    p_eval.add_argument("--max-samples", type=int, default=0)
+    p_eval.set_defaults(func=cmd_eval)
 
     args = root.parse_args()
     args.func(args)
