@@ -4,7 +4,7 @@ Last updated: 2026-04-18
 
 ## Summary
 
-Model B backend scaffolding is in place, the local backend environment is working, CalCOFI raw data is downloaded and uploaded to S3, a first-pass feature pipeline has been built from the real CalCOFI Bottle/Cast schema, an Isolation Forest baseline has been run, and a local CCE mooring sample has been downloaded and inspected.
+Model B backend scaffolding is in place, the local backend environment is working, CalCOFI raw data is downloaded and uploaded to S3, a first-pass feature pipeline has been built from the real CalCOFI Bottle/Cast schema, an Isolation Forest baseline has been run, a CCE mooring sample has been processed end to end, and the SageMaker training/package path has been smoke-tested.
 
 The current architectural understanding is:
 
@@ -143,6 +143,47 @@ Confirmed the main modeling caveat:
 - mooring depth grids do not match the CalCOFI `10m/50m/100m/200m` grid exactly
 - mooring data needs its own feature representation or explicit depth-mapping strategy
 
+### CCE mooring pipeline and S3 upload
+
+- Added:
+  - `backend/app/pipelines/ingest_mooring.py`
+  - `backend/app/pipelines/process_mooring.py`
+  - `backend/tests/test_mooring_pipeline.py`
+- Implemented raw upload to:
+  - `s3://reefpulse-dev-aayush-656732270977/raw/moorings/cce1/`
+  - `s3://reefpulse-dev-aayush-656732270977/raw/moorings/cce2/`
+- Implemented processed output upload to:
+  - `s3://reefpulse-dev-aayush-656732270977/processed/model_b/moorings_state_vectors.parquet`
+  - `s3://reefpulse-dev-aayush-656732270977/processed/model_b/moorings_state_vectors_metadata.json`
+- Normalized swapped coordinates in the `CCE2` oxygen file.
+- Changed depth selection to choose the best usable sensor by QC-filtered observation count.
+- Current mooring depth bands are:
+  - shallow = `0m-25m`
+  - mid = `25m-100m`
+  - deep = `100m-300m`
+- Verified local pipeline tests:
+  - `5 passed`
+
+### SageMaker-ready training path
+
+- Refactored `backend/training/model_b/train.py` so it supports:
+  - local parquet inputs
+  - SageMaker channel inputs
+  - local artifact/report outputs
+  - SageMaker model/output directories
+- Added:
+  - `backend/training/model_b/package_model.py`
+  - `backend/training/model_b/submit_training_job.py`
+  - `backend/training/model_b/deploy_sagemaker.py`
+- Ran a one-epoch local smoke test and created:
+  - `backend/training/model_b/artifacts/vae_smoke/model/model_b.pt`
+  - `backend/training/model_b/artifacts/vae_smoke/model/model_b_stats.json`
+  - `backend/training/model_b/artifacts/vae_smoke/reports/vae_report.json`
+  - `backend/training/model_b/artifacts/vae_smoke/reports/vae_predictions.parquet`
+  - `backend/training/model_b/artifacts/vae_smoke/model_b.tar.gz`
+- Uploaded smoke package to:
+  - `s3://reefpulse-dev-aayush-656732270977/models/model_b/model_b_smoke.tar.gz`
+
 ## Important correction
 
 ### What we originally did
@@ -171,25 +212,23 @@ CalCOFI is useful for historical baseline learning, but it is sparse and cruise-
 
 ## What is not finished yet
 
-- CCE Mooring ingestion pipeline has not been added yet.
-- Mooring sample files have not yet been uploaded to S3.
-- The VAE has not been trained on the processed features yet.
+- The current mooring upload is only a validated sample, not a full backfill.
+- The VAE has only been smoke-tested locally, not fully trained for production.
+- A real SageMaker training job has not been submitted yet.
+- A real SageMaker endpoint has not been deployed yet.
 - The anomaly detector has not been wired into a true Model A forecast cascade yet.
 - No final judge-facing model card has been written yet.
 
 ## Next steps
 
-1. Add `backend/app/pipelines/ingest_mooring.py` for CCE Mooring data.
-2. Build a mooring feature pipeline that produces current-state vectors compatible with Model B.
-3. Choose a mooring depth strategy:
-   - nearest-depth mapping
-   - or shallow / mid / deep grouped representation
-4. Upload the validated mooring sample files to S3 after the parser shape is agreed.
-5. Decide whether Model B training is:
+1. Decide the final Model B data strategy:
    - CalCOFI baseline + mooring inference
    - or hybrid CalCOFI + mooring training
-6. Train the VAE after the baseline and evaluation framing are locked.
-7. Update the service layer so Model B can score:
+2. Expand mooring ingestion beyond the six-file validated sample.
+3. Run a real VAE training job beyond the one-epoch smoke test.
+4. Submit the real SageMaker training job using `submit_training_job.py`.
+5. Package and deploy the final artifact using `deploy_sagemaker.py`.
+6. Update the service layer so Model B can score:
    - observed live state
    - Model A forecast state
 

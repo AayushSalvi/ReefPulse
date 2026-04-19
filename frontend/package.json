@@ -1,10 +1,21 @@
 {
-  "name": "reefpulse-frontend-workspace",
+  "name": "reefpulse-frontend",
   "private": true,
-  "description": "Run scripts from repo root `frontend/` — they delegate to `src/` where Vite + dependencies live.",
+  "version": "0.1.0",
+  "type": "module",
   "scripts": {
-    "dev": "npm run dev --prefix src",
-    "build": "npm run build --prefix src",
-    "preview": "npm run preview --prefix src"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@react-google-maps/api": "^2.20.8",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
+    "vite": "^5.4.19"
   }
 }
