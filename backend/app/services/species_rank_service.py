@@ -1,12 +1,20 @@
-"""Deterministic species encounter ranking (demo; replace with model inference later)."""
+"""Species encounter ranking: SageMaker Model D first, deterministic demo fallback."""
 
 from __future__ import annotations
 
 import hashlib
+import logging
 import math
 from datetime import date
+from typing import Any
 
+from fastapi import HTTPException
+
+from app.ml import model_registry
 from app.schemas.species import SpeciesPrediction, SpeciesRankRequest, SpeciesRankResponse
+from app.services import species_service
+
+logger = logging.getLogger(__name__)
 
 # Slugs aligned with frontend `mockData` beach ids → lat/lon + display name
 LOCATION_PRESETS: dict[str, dict[str, float | str]] = {
@@ -44,6 +52,89 @@ def _state_jitter(state_vector: list[float] | None) -> float:
     if not state_vector:
         return 0.0
     return (sum(state_vector[:16]) % 17) / 1000.0
+
+
+def _observation_date_str(req: SpeciesRankRequest) -> str | None:
+    if req.observed_date is None:
+        return None
+    return req.observed_date.isoformat()
+
+
+def _sagemaker_dict_to_response(req: SpeciesRankRequest, raw: dict[str, Any]) -> SpeciesRankResponse:
+    """Maps SageMaker JSON (Model D contract) into `SpeciesRankResponse`."""
+    preds_raw = raw.get("predictions")
+    if not isinstance(preds_raw, list) or not preds_raw:
+        raise ValueError("SageMaker response missing predictions")
+    top_k = min(10, max(1, req.top_k))
+    predictions: list[SpeciesPrediction] = []
+    for p in preds_raw[:top_k]:
+        if not isinstance(p, dict):
+            continue
+        species = p.get("species") or p.get("name") or p.get("scientific_name") or "Unknown"
+        raw_prob = p.get("encounter_probability", p.get("probability", p.get("score")))
+        if raw_prob is None:
+            continue
+        prob = max(0.0, min(1.0, float(raw_prob)))
+        predictions.append(
+            SpeciesPrediction(
+                species=str(species),
+                encounter_probability=round(prob, 4),
+                taxon_id=int(p.get("taxon_id", 0) or 0),
+                rarity=str(p.get("rarity", "common")),
+                safety=str(p.get("safety", "ok")),
+                label=str(p.get("label", "")),
+                rarity_flag=bool(p.get("rarity_flag", False)),
+                safety_flag=str(p.get("safety_flag", "ok")),
+            )
+        )
+    if not predictions:
+        raise ValueError("SageMaker predictions empty after mapping")
+    model_meta = raw.get("model") if isinstance(raw.get("model"), dict) else {}
+    endpoint_name = model_registry.endpoint_for(model_registry.SPECIES_FISH_RANKED)
+    trainer = model_meta.get("trainer_backend") or model_meta.get("model_source")
+    model_source = str(trainer) if trainer else f"sagemaker:{endpoint_name}"
+    q = raw.get("query") if isinstance(raw.get("query"), dict) else {}
+    raw_notes = raw.get("notes")
+    note_lines: list[str] = []
+    if isinstance(raw_notes, list):
+        note_lines.extend(str(n) for n in raw_notes)
+    note_lines.append(
+        f"Species ranked via SageMaker endpoint `{endpoint_name}` ({model_registry.SPECIES_FISH_RANKED})."
+    )
+    return SpeciesRankResponse(
+        location=req.location,
+        model_source=model_source,
+        predictions=predictions,
+        query={
+            "latitude": req.latitude,
+            "longitude": req.longitude,
+            **q,
+        },
+        model=dict(model_meta),
+        notes=note_lines,
+    )
+
+
+def rank_species_with_sagemaker_fallback(req: SpeciesRankRequest) -> SpeciesRankResponse:
+    """* Tries SageMaker (same payload as GET Model D); falls back to deterministic demo."""
+    top_k = min(10, max(1, req.top_k))
+    try:
+        raw = species_service.ranked_species_near(
+            latitude=req.latitude,
+            longitude=req.longitude,
+            observation_date=_observation_date_str(req),
+            top_k=top_k,
+        )
+        return _sagemaker_dict_to_response(req, raw)
+    except (HTTPException, ValueError, TypeError, KeyError) as exc:
+        if isinstance(exc, HTTPException):
+            logger.warning("SageMaker species rank unavailable (%s), using demo ranker", exc.detail)
+        else:
+            logger.warning("SageMaker species rank mapping failed (%s), using demo ranker", exc)
+        return rank_species(req)
+    except Exception as exc:  # noqa: BLE001 — intentional broad fallback for boto/network
+        logger.warning("SageMaker species rank failed (%s), using demo ranker", exc)
+        return rank_species(req)
 
 
 def rank_species(req: SpeciesRankRequest) -> SpeciesRankResponse:
