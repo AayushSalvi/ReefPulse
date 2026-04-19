@@ -12,9 +12,23 @@ This backend scaffold follows the ReefPulse proposal:
 
 The starting assumption is Python + FastAPI because the proposal leans heavily on Python data and ML tooling.
 
+## Model D — Likelihood of fish at a location (SageMaker)
+
+**Model D** predicts **likelihoods for fish species found at a location**: the client sends **`latitude`/`longitude`**, optional **`date`**, and **`top_k`**; SageMaker returns **ranked species with likelihood scores** (exact JSON depends on your deployed model). The FastAPI route merges that with `location_slug` for the response.
+
+| Piece | Location |
+|-------|-----------|
+| HTTP route | `app/api/routes/species.py` → `GET …/species/{location_slug}` |
+| Inference call | `app/services/species_service.py` |
+| SageMaker JSON helper | `app/ml/inference_router.py` (`invoke_sagemaker_json`) |
+| Endpoint name mapping | `app/ml/model_registry.py` (`SPECIES_FISH_RANKED`, `endpoint_for`) |
+| Endpoint configuration | `app/core/config.py` → **`sagemaker_endpoint_species`** (override with **`SAGEMAKER_ENDPOINT_SPECIES`** in `.env`) |
+
+Tests: `tests/test_species.py`. Training and packaging for the endpoint itself live in your SageMaker / ML project; this repo wires **serving** and the **public API**.
+
 ## iNaturalist fish tool (Lambda-ready)
 
-The standalone package `inaturalist_usa_fish/` (same layout as the DataHacks prototype) lives next to `app/`. It provides `fetch_fish_near`, a CLI entrypoint pattern, and `lambda_handler` for API Gateway. SAM deploy lives under `../infra/aws/inaturalist-fish-lambda/` (see that folder’s README).
+The standalone package `inaturalist_usa_fish/` (same layout as the DataHacks prototype) lives next to `app/`. It provides `fetch_fish_near`, a CLI entrypoint pattern, and `lambda_handler` for API Gateway. SAM deploy lives under `../infra/aws/inaturalist-fish-lambda/` (see that folder’s README). Use it alongside Model D for iNaturalist-driven discovery; the FastAPI species route uses Model D (SageMaker) as documented above.
 
 ## Model A (State Forecaster)
 
