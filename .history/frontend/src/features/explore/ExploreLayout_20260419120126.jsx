@@ -246,6 +246,21 @@ function ExploreLayout() {
               mapGeocodeEnabled={!locationId}
             />
 
+            {/* Sidebar block: saved + nearby shortcuts */}
+            <div className="ex-label">Saved places</div>
+            <ul className="ex-mini-list">
+              {saved.map((s) => (
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/explore/${s.id}`)}
+                  >
+                    {s.name}
+                  </button>
+                </li>
+              ))}
+            </ul>
+
             {loc && (
               <>
                 <div className="ex-label">Nearby</div>

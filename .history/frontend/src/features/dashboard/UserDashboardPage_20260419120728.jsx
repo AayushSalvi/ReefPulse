@@ -506,6 +506,12 @@ function UserDashboardPage() {
           </p>
         </article>
       </section>
+      {modelAError ? (
+        <p
+          className="dash-dash-head__api dash-dash-head__api--warn"
+          role="status"
+        ></p>
+      ) : null}
 
       <div className="dash-main-split">
         {/* —— Safety + verdict —— */}
