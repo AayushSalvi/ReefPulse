@@ -7,6 +7,7 @@
  *   features/explore/       → `/explore`, `/explore/:locationId` (species cards)
  *   features/marine-life/     → `/marine-life` species-first discovery
  *   features/community/     → `/community` posts & feed
+ *   features/assistant/     → `/assistant` Gemini Q&A (server key)
  *   features/challenges/    → `/challenges` goals, badges, trophies
  *   features/legacy/        → `/location/:id` redirects to Explore
  *   features/standalone/    → NOT routed here; optional admin / forecast UIs for future routes
@@ -29,6 +30,7 @@ import LegacyLocationRedirect from "./features/legacy/LegacyLocationRedirect";
 import MarineLifeDiscoveryPage from "./features/marine-life/MarineLifeDiscoveryPage";
 import OceanOraclePage from "./features/oracle/OceanOraclePage";
 import UserDashboardPage from "./features/dashboard/UserDashboardPage";
+import ReefAssistantPage from "./features/assistant/ReefAssistantPage";
 
 function App() {
   return (
@@ -58,6 +60,7 @@ function App() {
         />
         <Route path="/dashboard" element={<UserDashboardPage />} />
         <Route path="/community" element={<CommunityPage />} />
+        <Route path="/assistant" element={<ReefAssistantPage />} />
         <Route path="/challenges" element={<ChallengesPage />} />
         <Route path="/saved" element={<Navigate to="/explore" replace />} />
 

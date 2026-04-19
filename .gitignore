@@ -1,6 +1,7 @@
 # Python
 __pycache__/
 *.py[cod]
+*.egg-info/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -29,6 +30,10 @@ coverage/
 htmlcov/
 *.egg-info/
 
+# AWS SAM
+.aws-sam/
+sam-deploy.log
+
 # Data & ML artifacts (keep in S3; regenerate locally)
 *.npz
 *.pt
@@ -36,6 +41,7 @@ htmlcov/
 backend/model_a_data/
 # Repo-root data only (do not ignore frontend/src/data mock fixtures)
 /data/
+
 tmp/
 logs/
 *.sqlite3

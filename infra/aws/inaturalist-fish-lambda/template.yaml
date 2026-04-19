@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: ReefPulse — iNaturalist California fish lookup Lambda (HTTP API).
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Architectures:
+      - x86_64
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        CORS_ORIGIN: "*"
+
+Parameters:
+  CorsOrigin:
+    Type: String
+    Default: "*"
+    Description: Value for the CORS_ORIGIN env var on the Lambda function.
+
+Resources:
+  InatFishFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: python3.12
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-inaturalist-fish"
+      Description: Returns iNaturalist fish observations near a lat/lon (default California).
+      CodeUri: ../../../backend
+      Handler: inaturalist_usa_fish.lambda_handler.lambda_handler
+      Environment:
+        Variables:
+          CORS_ORIGIN: !Ref CorsOrigin
+      Events:
+        GetFishApi:
+          Type: HttpApi
+          Properties:
+            Path: /fish
+            Method: get
+            ApiId: !Ref FishHttpApi
+        OptionsFishApi:
+          Type: HttpApi
+          Properties:
+            Path: /fish
+            Method: options
+            ApiId: !Ref FishHttpApi
+
+  FishHttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowMethods:
+          - GET
+          - OPTIONS
+        AllowHeaders:
+          - "*"
+        AllowOrigins:
+          - !Ref CorsOrigin
+
+Outputs:
+  FunctionName:
+    Description: Lambda function name
+    Value: !Ref InatFishFunction
+  FunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt InatFishFunction.Arn
+  ApiUrl:
+    Description: Invoke URL for the /fish endpoint
+    Value: !Sub "https://${FishHttpApi}.execute-api.${AWS::Region}.amazonaws.com/fish"

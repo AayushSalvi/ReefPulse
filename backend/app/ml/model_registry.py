@@ -1,3 +1,5 @@
+"""Logical model names, SageMaker endpoints, and Model B loaders."""
+
 from __future__ import annotations
 
 import json
@@ -8,6 +10,15 @@ from typing import Protocol
 
 from app.core.config import settings
 from app.schemas.anomaly import DEFAULT_MODEL_B_FEATURES
+
+SPECIES_FISH_RANKED = "species_fish_ranked"
+
+
+def endpoint_for(model_key: str) -> str:
+    """Resolves a logical model key to an endpoint name from settings."""
+    if model_key == SPECIES_FISH_RANKED:
+        return settings.sagemaker_endpoint_species
+    raise KeyError(f"Unknown model key: {model_key!r}")
 
 
 @dataclass
@@ -110,10 +121,11 @@ def load_model_b() -> SupportsReconstruction:
     return HeuristicAnomalyModel()
 
 
-# Model A (optional import; torch only needed when using checkpoints)
 from app.ml.model_a.inference import ModelAForecaster, load_forecaster
 
 __all__ = [
+    "SPECIES_FISH_RANKED",
+    "endpoint_for",
     "HeuristicAnomalyModel",
     "ModelAForecaster",
     "ReconstructionResult",
