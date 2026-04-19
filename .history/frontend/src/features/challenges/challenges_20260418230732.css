@@ -112,24 +112,9 @@
   gap: 0.5rem;
 }
 
-.ch-trophy-banner__tier-icon {
-  display: flex;
-  flex-shrink: 0;
-  color: rgba(223, 255, 79, 0.95);
-}
-
-.ch-trophy-banner__next-tier-lockup {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.2rem 0.45rem;
-}
-
-.ch-trophy-banner__next-tier-name {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  color: rgba(248, 250, 252, 0.92);
+.ch-trophy-banner__tier-emoji {
+  font-size: 1.35rem;
+  line-height: 1;
 }
 
 .ch-trophy-banner__tier-text {
@@ -323,33 +308,11 @@
   opacity: 0.45;
 }
 
-.ch-tier-chip__icon {
-  display: flex;
-  flex-shrink: 0;
-  color: inherit;
-}
-
 .ch-tier-chip__name {
   max-width: 7rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* Shared stroke icons (`challengeIcons.jsx`) */
-.ch-icon {
-  display: block;
-  flex-shrink: 0;
-}
-
-.ch-icon--sm {
-  width: 18px;
-  height: 18px;
-}
-
-.ch-icon--chip {
-  width: 15px;
-  height: 15px;
 }
 
 .ch-details__cohort {
@@ -492,6 +455,7 @@
   display: flex;
   flex-direction: column;
   border-radius: var(--ch-radius);
+  border: 1px solid var(--ch-border);
   background: #fff;
   overflow: hidden;
   transition: box-shadow 0.15s ease;
@@ -512,11 +476,9 @@
   color: #292f69;
 }
 
-.ch-card__icon {
-  display: flex;
-  flex-shrink: 0;
-  line-height: 0;
-  color: inherit;
+.ch-card__emoji {
+  font-size: 1.75rem;
+  line-height: 1;
 }
 
 .ch-card__banner-text {

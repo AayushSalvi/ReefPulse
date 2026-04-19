@@ -204,8 +204,7 @@ const RAW_SIGHTINGS = [
     challengeCompletion: {
       challengeId: "species-bingo",
       title: "New fins bingo",
-      badgeName: "Progress",
-      emoji: "🐠"
+      badgeName: "Progress"
     }
   },
   {
@@ -303,8 +302,7 @@ const RAW_SIGHTINGS = [
     challengeCompletion: {
       challengeId: "kelp-quiet",
       title: "Kelp forest quiet hour",
-      badgeName: "Low-impact observer",
-      emoji: "🤫"
+      badgeName: "Low-impact observer"
     }
   },
   {
@@ -325,8 +323,7 @@ const RAW_SIGHTINGS = [
     challengeCompletion: {
       challengeId: "tidepool-doc",
       title: "Tidepool documentarian",
-      badgeName: "Rock pool archivist",
-      emoji: "📷"
+      badgeName: "Rock pool archivist"
     }
   },
   {

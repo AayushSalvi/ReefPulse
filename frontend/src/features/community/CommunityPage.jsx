@@ -5,7 +5,9 @@
  */
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { getChallengeIconId } from "../../data/challengesData";
 import { communitySightingsFiltered, locations } from "../../data/mockData";
+import { ChallengeCardIcon } from "../challenges/challengeIcons";
 import "../explore/workflow.css";
 import "./community.css";
 
@@ -109,8 +111,8 @@ function FeedPost({ sighting: s }) {
         {s.challengeCompletion ? (
           <div className="comm-post__achievement">
             <Link to="/challenges" className="comm-post__achievement-link">
-              <span className="comm-post__achievement-emoji" aria-hidden>
-                {s.challengeCompletion.emoji}
+              <span className="comm-post__achievement-icon" aria-hidden>
+                <ChallengeCardIcon name={getChallengeIconId(s.challengeCompletion.challengeId)} />
               </span>
               <span className="comm-post__achievement-text">
                 <span className="comm-post__achievement-label">Challenge</span>

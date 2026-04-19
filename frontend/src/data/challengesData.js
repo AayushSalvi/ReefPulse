@@ -3,14 +3,14 @@
  * Replace with API data in production.
  */
 
-/** @typedef {{ id: string; title: string; emoji: string; theme: string; blurb: string; durationDays: number; progressPct: number; completed: boolean; badgeName: string; points: number }} Challenge */
+/** @typedef {{ id: string; title: string; icon: string; theme: string; blurb: string; durationDays: number; progressPct: number; completed: boolean; badgeName: string; points: number }} Challenge */
 
 /** @type {Challenge[]} */
 export const challenges = [
   {
     id: "eco-shore-clean",
     title: "Shoreline guardian",
-    emoji: "🌊",
+    icon: "shore-wave",
     theme: "environmental",
     blurb: "Log 3 beach visits with a photo and one piece of debris removed or reported.",
     durationDays: 14,
@@ -22,7 +22,7 @@ export const challenges = [
   {
     id: "species-bingo",
     title: "New fins bingo",
-    emoji: "🐠",
+    icon: "fish-school",
     theme: "discovery",
     blurb: "Spot 5 species you have not logged in ReefPulse before this month.",
     durationDays: 30,
@@ -34,7 +34,7 @@ export const challenges = [
   {
     id: "kelp-quiet",
     title: "Kelp forest quiet hour",
-    emoji: "🤫",
+    icon: "quiet-observe",
     theme: "fun",
     blurb: "One snorkel session where you observe without chasing wildlife — post field notes.",
     durationDays: 7,
@@ -46,7 +46,7 @@ export const challenges = [
   {
     id: "viz-logging",
     title: "Visibility for science",
-    emoji: "📏",
+    icon: "ruler-viz",
     theme: "environmental",
     blurb: "Submit 4 visibility readings at different tides to help the community dataset.",
     durationDays: 21,
@@ -58,7 +58,7 @@ export const challenges = [
   {
     id: "tidepool-doc",
     title: "Tidepool documentarian",
-    emoji: "📷",
+    icon: "camera-tide",
     theme: "discovery",
     blurb: "Document 3 intertidal species with geotagged photos and respectful distance.",
     durationDays: 10,
@@ -70,7 +70,7 @@ export const challenges = [
   {
     id: "buddy-snorkel",
     title: "Buddy system weekend",
-    emoji: "🤿",
+    icon: "snorkel-buddy",
     theme: "fun",
     blurb: "Complete one snorkel with a partner and both post a safety checklist tick.",
     durationDays: 5,
@@ -90,11 +90,17 @@ export const challengeThemes = [
 
 /** Demo cumulative trophy ladder (points from completed challenges). */
 export const trophyTiers = [
-  { id: "bronze", name: "Bronze reef", minPoints: 0, emoji: "🥉" },
-  { id: "silver", name: "Silver current", minPoints: 100, emoji: "🥈" },
-  { id: "gold", name: "Gold kelp", minPoints: 250, emoji: "🥇" },
-  { id: "platinum", name: "Platinum tide", minPoints: 500, emoji: "✨" }
+  { id: "bronze", name: "Bronze reef", minPoints: 0 },
+  { id: "silver", name: "Silver current", minPoints: 100 },
+  { id: "gold", name: "Gold kelp", minPoints: 250 },
+  { id: "platinum", name: "Platinum tide", minPoints: 500 }
 ];
+
+/** Icon key for `ChallengeCardIcon` from a challenge id (e.g. community completion). */
+export function getChallengeIconId(challengeId) {
+  const c = challenges.find((x) => x.id === challengeId);
+  return c?.icon ?? "shore-wave";
+}
 
 export function demoTrophyPoints() {
   return challenges.filter((c) => c.completed).reduce((sum, c) => sum + c.points, 0);

@@ -16,6 +16,7 @@ import {
   nextTrophyTier,
   trophyTiers
 } from "../../data/challengesData";
+import { ChallengeCardIcon, TrophyTierIcon } from "./challengeIcons";
 import "../explore/workflow.css";
 import "./challenges.css";
 
@@ -23,8 +24,8 @@ function ChallengeCard({ c }) {
   return (
     <article className={`ch-card ${c.completed ? "is-complete" : ""}`}>
       <div className="ch-card__banner">
-        <span className="ch-card__emoji" aria-hidden>
-          {c.emoji}
+        <span className="ch-card__icon" aria-hidden>
+          <ChallengeCardIcon name={c.icon} />
         </span>
         <div className="ch-card__banner-text">
           <h2 className="ch-card__title">{c.title}</h2>
@@ -108,8 +109,8 @@ function ChallengesPage() {
               <span className="ch-trophy-banner__unit">pts</span>
             </p>
             <p className="ch-trophy-banner__tier">
-              <span className="ch-trophy-banner__tier-emoji" aria-hidden>
-                {tier.emoji}
+              <span className="ch-trophy-banner__tier-icon" aria-hidden>
+                <TrophyTierIcon tierId={tier.id} />
               </span>
               <span className="ch-trophy-banner__tier-text">
                 <span className="ch-trophy-banner__tier-label">Current tier</span>
@@ -124,8 +125,12 @@ function ChallengesPage() {
             {nextTier ? (
               <>
                 <p className="ch-trophy-banner__next-label">
-                  <span>
-                    Next tier · {nextTier.emoji} {nextTier.name}
+                  <span className="ch-trophy-banner__next-tier-lockup">
+                    <span>Next tier ·</span>
+                    <span className="ch-trophy-banner__next-tier-name" aria-hidden>
+                      <TrophyTierIcon tierId={nextTier.id} className="ch-icon--sm" />
+                      <span>{nextTier.name}</span>
+                    </span>
                   </span>
                   <span className="ch-trophy-banner__next-gap">{ptsToNextTier} pts to go</span>
                 </p>
@@ -201,7 +206,9 @@ function ChallengesPage() {
                   className={`ch-tier-chip ${!unlocked ? "is-locked" : ""} ${active ? "is-current" : ""}`}
                   title={`${t.name} · ${t.minPoints}+ pts`}
                 >
-                  <span aria-hidden>{t.emoji}</span>
+                  <span className="ch-tier-chip__icon" aria-hidden>
+                    <TrophyTierIcon tierId={t.id} className="ch-icon--chip" />
+                  </span>
                   <span className="ch-tier-chip__name">{t.name}</span>
                 </div>
               );

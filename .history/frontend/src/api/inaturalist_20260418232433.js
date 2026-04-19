@@ -11,8 +11,12 @@ export const INAT_PLACE_ID_CALIFORNIA = "14";
 
 const TAXA_FIELDS =
   "name,matched_term,rank,iconic_taxon_id,default_photo.medium_url,default_photo.url,default_photo.square_url";
+/** Taxon detail for Marine life: photo + iNat conservation listings (IUCN etc.). */
 const TAXON_DETAIL_FIELDS =
-  "name,default_photo.medium_url,default_photo.url,default_photo.square_url";
+  "name,default_photo.medium_url,default_photo.url,default_photo.square_url," +
+  "conservation_statuses,conservation_statuses.status,conservation_statuses.authority," +
+  "conservation_statuses.iucn,conservation_statuses.url,conservation_statuses.place," +
+  "conservation_statuses.place.display_name";
 const OBS_FIELDS = "place_guess,location,species_guess,geojson";
 
 /** Prefer fish, sharks/rays, mollusks, marine mammals, etc. */
@@ -53,12 +57,7 @@ export function parseObservationLatLng(o) {
     }
   }
   const gj = o.geojson;
-  if (
-    gj &&
-    gj.type === "Point" &&
-    Array.isArray(gj.coordinates) &&
-    gj.coordinates.length >= 2
-  ) {
+  if (gj && gj.type === "Point" && Array.isArray(gj.coordinates) && gj.coordinates.length >= 2) {
     const lng = parseFloat(gj.coordinates[0]);
     const lat = parseFloat(gj.coordinates[1]);
     if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng };
@@ -77,14 +76,82 @@ export async function fetchTaxonById(taxonId, signal) {
   if (!id) return null;
   const url = new URL(`${BASE}/taxa/${encodeURIComponent(id)}`);
   url.searchParams.set("fields", TAXON_DETAIL_FIELDS);
-  const res = await fetch(url.toString(), {
-    signal,
-    headers: { Accept: "application/json" },
-  });
+  const res = await fetch(url.toString(), { signal, headers: { Accept: "application/json" } });
   if (!res.ok) throw new Error(`iNaturalist taxon error (${res.status})`);
   const json = await res.json();
   const results = json?.results;
   return Array.isArray(results) && results[0] ? results[0] : null;
+}
+
+const V1_BASE = "https://api.inaturalist.org/v1";
+
+/**
+ * California observation counts by calendar month (all years) — useful for snorkel “seasonality”.
+ * @param {number|string} taxonId
+ * @param {AbortSignal} [signal]
+ * @returns {Promise<Record<string, number>>} keys `"1"`…`"12"` → observation count
+ */
+export async function fetchTaxonMonthHistogramCalifornia(taxonId, signal) {
+  const id = String(taxonId).trim();
+  if (!id) return {};
+  const url = new URL(`${V1_BASE}/observations/histogram`);
+  url.searchParams.set("taxon_id", id);
+  url.searchParams.set("place_id", INAT_PLACE_ID_CALIFORNIA);
+  url.searchParams.set("date_field", "observed_on");
+  url.searchParams.set("interval", "month_of_year");
+  const res = await fetch(url.toString(), { signal, headers: { Accept: "application/json" } });
+  if (!res.ok) throw new Error(`iNaturalist histogram error (${res.status})`);
+  const json = await res.json();
+  const bucket = json?.results?.month_of_year;
+  return bucket && typeof bucket === "object" ? bucket : {};
+}
+
+/**
+ * @param {unknown} statuses from `taxon.conservation_statuses`
+ * @returns {{ status: string; authority?: string; iucn?: number; url?: string; placeName?: string }[]}
+ */
+export function parseConservationStatuses(statuses) {
+  if (!Array.isArray(statuses) || !statuses.length) return [];
+  const out = [];
+  for (const s of statuses) {
+    if (!s || typeof s !== "object") continue;
+    const status = typeof s.status === "string" ? s.status.trim() : "";
+    if (!status) continue;
+    const place = s.place && typeof s.place === "object" ? s.place : null;
+    const placeName =
+      place && typeof place.display_name === "string"
+        ? place.display_name.trim()
+        : place && typeof place.name === "string"
+          ? place.name.trim()
+          : "";
+    out.push({
+      status,
+      authority: typeof s.authority === "string" ? s.authority : undefined,
+      iucn: typeof s.iucn === "number" ? s.iucn : undefined,
+      url: typeof s.url === "string" ? s.url : undefined,
+      placeName: placeName || undefined
+    });
+  }
+  /** Global (no place) first, then regional. */
+  return out.sort((a, b) => {
+    const ag = a.placeName ? 1 : 0;
+    const bg = b.placeName ? 1 : 0;
+    return ag - bg;
+  });
+}
+
+/**
+ * @param {Record<string, number>} monthHistogram keys "1"…"12"
+ */
+export function summarizeMonthHistogram(monthHistogram) {
+  const byMonth = Array.from({ length: 12 }, (_, i) => {
+    const n = monthHistogram[String(i + 1)];
+    return typeof n === "number" && Number.isFinite(n) ? n : 0;
+  });
+  const total = byMonth.reduce((a, b) => a + b, 0);
+  const peakIdx = byMonth.length ? byMonth.indexOf(Math.max(...byMonth)) : -1;
+  const peakCount = peakIdx >= 0 ? byMonth[peakIdx] : 0;
+  return { byMonth, total, peakIdx, peakCount };
 }
 
 /**
@@ -97,10 +164,7 @@ export function pickMarineTaxon(results) {
     const hit = results.find((t) => t.iconic_taxon_id === iconic);
     if (hit) return hit;
   }
-  const ok = results.find(
-    (t) =>
-      t.iconic_taxon_id != null && !DEPRIORITIZE_ICONIC.has(t.iconic_taxon_id),
-  );
+  const ok = results.find((t) => t.iconic_taxon_id != null && !DEPRIORITIZE_ICONIC.has(t.iconic_taxon_id));
   return ok || results[0];
 }
 
@@ -117,10 +181,7 @@ export async function taxaAutocomplete(q, signal) {
   url.searchParams.set("per_page", "15");
   url.searchParams.set("fields", TAXA_FIELDS);
 
-  const res = await fetch(url.toString(), {
-    signal,
-    headers: { Accept: "application/json" },
-  });
+  const res = await fetch(url.toString(), { signal, headers: { Accept: "application/json" } });
   if (!res.ok) throw new Error(`iNaturalist taxa error (${res.status})`);
   const json = await res.json();
   return Array.isArray(json.results) ? json.results : [];
@@ -150,16 +211,11 @@ export async function observationsByTaxonCalifornia(taxonId, opts = {}) {
     url.searchParams.set("order", "desc");
     url.searchParams.set("fields", OBS_FIELDS);
 
-    const res = await fetch(url.toString(), {
-      signal,
-      headers: { Accept: "application/json" },
-    });
-    if (!res.ok)
-      throw new Error(`iNaturalist observations error (${res.status})`);
+    const res = await fetch(url.toString(), { signal, headers: { Accept: "application/json" } });
+    if (!res.ok) throw new Error(`iNaturalist observations error (${res.status})`);
     const json = await res.json();
     const batch = Array.isArray(json.results) ? json.results : [];
-    if (page === 1 && typeof json.total_results === "number")
-      totalResults = json.total_results;
+    if (page === 1 && typeof json.total_results === "number") totalResults = json.total_results;
     all = all.concat(batch);
     if (batch.length < perPage) break;
   }
@@ -175,10 +231,7 @@ function haversineKm(lat1, lon1, lat2, lon2) {
   const dLon = toRad(lon2 - lon1);
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
@@ -193,18 +246,8 @@ function haversineKm(lat1, lon1, lat2, lon2) {
  * @param {number} [maxKm]
  * @returns {{ label: string; count: number }[]}
  */
-export function topCaBeachesFromObservations(
-  observations,
-  beaches,
-  limit = 3,
-  maxKm = 55,
-) {
-  if (
-    !Array.isArray(observations) ||
-    !Array.isArray(beaches) ||
-    !beaches.length
-  )
-    return [];
+export function topCaBeachesFromObservations(observations, beaches, limit = 3, maxKm = 55) {
+  if (!Array.isArray(observations) || !Array.isArray(beaches) || !beaches.length) return [];
 
   const map = new Map();
   for (const o of observations) {
@@ -230,10 +273,7 @@ export function topCaBeachesFromObservations(
     if (!key) continue;
     const label = String(best.name || "Beach").trim();
     const prev = map.get(key);
-    map.set(key, {
-      label: prev?.label || label,
-      count: (prev?.count || 0) + 1,
-    });
+    map.set(key, { label: prev?.label || label, count: (prev?.count || 0) + 1 });
   }
 
   return [...map.values()].sort((a, b) => b.count - a.count).slice(0, limit);
@@ -248,10 +288,7 @@ export function pinsFromObservations(observations, maxPins = 20) {
   for (const o of observations) {
     const pos = parseObservationLatLng(o);
     if (!pos) continue;
-    const label = (o.place_guess || o.species_guess || "Observation").slice(
-      0,
-      32,
-    );
+    const label = (o.place_guess || o.species_guess || "Observation").slice(0, 32);
     pins.push({ lat: pos.lat, lng: pos.lng, label });
     if (pins.length >= maxPins) break;
   }
@@ -294,7 +331,7 @@ export function aggregateObservationDots(observations, opts = {}) {
         count: 1,
         sumLat: lat,
         sumLng: lng,
-        label: guess,
+        label: guess
       });
     }
   }
