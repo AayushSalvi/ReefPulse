@@ -66,6 +66,7 @@ Current bucket:
 Current relevant prefixes:
 
 - `raw/calcofi/`
+- `raw/moorings/`
 - `processed/`
 - `models/model_b/`
 
@@ -73,6 +74,12 @@ Uploaded raw source files:
 
 - `s3://reefpulse-dev-aayush-656732270977/raw/calcofi/bottle_db.csv`
 - `s3://reefpulse-dev-aayush-656732270977/raw/calcofi/cast_db.csv`
+- `s3://reefpulse-dev-aayush-656732270977/raw/moorings/cce1/OS_CCE1_16_D_CHL.nc`
+- `s3://reefpulse-dev-aayush-656732270977/raw/moorings/cce1/OS_CCE1_17_D_CTD.nc`
+- `s3://reefpulse-dev-aayush-656732270977/raw/moorings/cce1/OS_CCE1_17_D_OXYGEN.nc`
+- `s3://reefpulse-dev-aayush-656732270977/raw/moorings/cce2/OS_CCE2_16_D_CHL.nc`
+- `s3://reefpulse-dev-aayush-656732270977/raw/moorings/cce2/OS_CCE2_16_D_CTD.nc`
+- `s3://reefpulse-dev-aayush-656732270977/raw/moorings/cce2/OS_CCE2_16_D_OXYGEN.nc`
 
 ### CalCOFI local source files
 
@@ -212,12 +219,54 @@ Observed depth issue:
 - mooring depth levels do not align exactly with CalCOFI `10/50/100/200m`
 - do not force the same depth grid without a deliberate mapping strategy
 
+### CCE mooring code that now exists
+
+Relevant files:
+
+- `backend/app/pipelines/ingest_mooring.py`
+- `backend/app/pipelines/process_mooring.py`
+- `backend/tests/test_mooring_pipeline.py`
+
+Current behavior:
+
+- raw mooring files can be uploaded to S3
+- processed mooring state vectors can be written locally and to S3
+- current depth bands are:
+  - shallow = `0m-25m`
+  - mid = `25m-100m`
+  - deep = `100m-300m`
+- `CCE2` oxygen coordinate swap is normalized
+- depth selection is based on QC-filtered usable observations, not just nearest sensor
+
+Current processed mooring artifacts in S3:
+
+- `s3://reefpulse-dev-aayush-656732270977/processed/model_b/moorings_state_vectors.parquet`
+- `s3://reefpulse-dev-aayush-656732270977/processed/model_b/moorings_state_vectors_metadata.json`
+
+### SageMaker path that now exists
+
+Relevant files:
+
+- `backend/training/model_b/train.py`
+- `backend/training/model_b/package_model.py`
+- `backend/training/model_b/submit_training_job.py`
+- `backend/training/model_b/deploy_sagemaker.py`
+- `backend/training/model_b/inference.py`
+
+What was validated:
+
+- local VAE smoke training completed
+- a SageMaker-compatible tarball was created
+- smoke package uploaded to:
+  - `s3://reefpulse-dev-aayush-656732270977/models/model_b/model_b_smoke.tar.gz`
+
 ## What is not complete
 
-- `backend/app/pipelines/ingest_mooring.py` does not exist yet.
-- Mooring sample files have not yet been uploaded to S3.
-- The VAE has not been trained yet on the current processed features.
-- Model B is not yet wired into a real Model A forecast cascade at inference time.
+- the current mooring data in S3 is still only a validated sample
+- the VAE has only been smoke-tested, not fully trained for production
+- no real SageMaker training job has been submitted yet
+- no real SageMaker endpoint has been deployed yet
+- Model B is not yet wired into a real Model A forecast cascade at inference time
 
 ## Important caveats
 
@@ -258,15 +307,13 @@ There is a local `backend/.env` file pointing at the real S3 bucket. Treat it as
 
 ## Suggested next actions
 
-1. Add `backend/app/pipelines/ingest_mooring.py`
-2. Build a mooring feature representation that does not blindly assume the CalCOFI depth grid
-3. Validate the current local mooring sample with a parser before more S3 upload
-4. Upload validated mooring raw files to S3
-5. Decide whether Model B training will be:
+1. Decide whether Model B training will be:
    - CalCOFI baseline + mooring inference only
    - or hybrid CalCOFI + mooring training
-6. Train the VAE only after the baseline and evaluation framing are stable
-7. Update `anomaly_service` so it explicitly supports:
+2. Expand mooring ingestion beyond the six-file sample
+3. Run a real VAE training job beyond the smoke test
+4. Deploy a real SageMaker endpoint after final packaging
+5. Update `anomaly_service` so it explicitly supports:
    - scoring observed live state
    - scoring Model A forecast state
 
@@ -291,3 +338,4 @@ For a human-oriented status summary, also read:
 
 - `docs/model_b_progress.md`
 - `docs/model_b_next_steps.md`
+- `docs/model_b_aws_sagemaker.md`

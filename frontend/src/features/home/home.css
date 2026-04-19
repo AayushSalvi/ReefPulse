@@ -27,8 +27,12 @@
 
 /* —— Hero —— */
 .home-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   text-align: center;
-  padding: clamp(2.5rem, 8vw, 5rem) 1.25rem 0;
+  padding: clamp(16rem, 18vw, 28rem) 1.25rem clamp(16rem, 28vw, 22rem);
+  min-height: 140vh;
   background: linear-gradient(
     180deg,
     var(--home-navy) 0%,
@@ -36,7 +40,21 @@
   );
 }
 
+.home-hero-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
 .home-hero-title {
+  position: relative;
+  z-index: 5;
   margin: 0;
   font-size: clamp(2.5rem, 8vw, 4.25rem);
   font-weight: 800;
@@ -45,11 +63,89 @@
   color: var(--home-lime);
 }
 
+/* Fills all space from below the tagline to the bottom of `.home-hero` */
+.home-hero-fish-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: 0.65rem;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: min(100%, 640px);
+  overflow: hidden;
+  border-radius: 0 0 12px 12px;
+}
+
+.home-hero-fish-zone {
+  position: relative;
+  z-index: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  pointer-events: none;
+}
+
+.home-hero-fish-zone--swim {
+  /* grows with `.home-hero-fish-field`; keeps layout height for bounds math */
+  flex: 1 1 auto;
+  min-height: clamp(6rem, 18vh, 12rem);
+}
+
+.home-hero-fish-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.home-hero-fish {
+  position: absolute;
+  width: 88px;
+  height: 44px;
+  left: 50%;
+  top: 50%;
+  margin: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(0deg);
+  will-change: transform, left, top;
+}
+
+.home-hero-fish--sm {
+  width: 72px;
+  height: 36px;
+}
+
+.home-hero-fish--xs {
+  width: 56px;
+  height: 28px;
+}
+
+.home-hero-fish-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero-fish {
+    will-change: auto;
+  }
+}
+
 .home-hero-sub {
+  position: relative;
+  z-index: 5;
   margin: 0.75rem 0 0;
   font-size: clamp(1rem, 2.5vw, 1.35rem);
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.92);
+  color: #faff6c;
 }
 
 .home-live-bar {
@@ -302,12 +398,7 @@
   min-height: 140px;
   padding: 1.25rem 1.35rem;
   border-radius: var(--home-radius);
-  background: linear-gradient(
-    135deg,
-    #fde047 0%,
-    var(--home-lime) 55%,
-    #bef264 100%
-  );
+  background: #faff6c;
   border: 1px solid rgba(255, 255, 255, 0.35);
   display: flex;
   flex-direction: column;
@@ -342,10 +433,78 @@
   opacity: 0.92;
 }
 
+/* —— Animated wave: visually links “Safest Beaches” (shore) → “Trending Marine Life” —— */
+.home-wave-bridge {
+  position: relative;
+  z-index: 1;
+  margin-top: -1px;
+  background: var(--home-surface);
+}
+
+.home-wave-track {
+  width: 100%;
+  height: clamp(80px, 13vw, 128px);
+  overflow: hidden;
+  line-height: 0;
+}
+
+.home-wave-marquee {
+  display: flex;
+  width: 200%;
+  height: 100%;
+}
+
+.home-wave-chunk {
+  flex: 0 0 50%;
+  width: 50%;
+  height: 100%;
+  display: block;
+}
+
+@keyframes home-wave-slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .home-wave-marquee {
+    animation: home-wave-slide 18s linear infinite;
+  }
+}
+
 /* —— Marine life —— */
 .home-marine {
-  padding: clamp(2.5rem, 6vw, 4rem) clamp(1rem, 4vw, 2.5rem);
+  padding: clamp(1.25rem, 4vw, 2.25rem) clamp(1rem, 4vw, 2.5rem)
+    clamp(3.75rem, 11vw, 7rem);
   background: var(--home-white);
+}
+
+.home-marine-head {
+  max-width: 1120px;
+  margin: 0 auto 1.75rem;
+  align-items: flex-start;
+}
+
+.home-marine-head > div:first-child {
+  min-width: 0;
+}
+
+.home-marine-cta {
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.home-marine-lede {
+  margin: 0.9rem 0 0;
+  max-width: 42rem;
+  font-size: clamp(0.9rem, 1.6vw, 1.02rem);
+  line-height: 1.58;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .home-marine .home-section-title {
@@ -358,10 +517,10 @@
 
 .home-marine-grid {
   max-width: 1120px;
-  margin: 1.5rem auto 0;
+  margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
+  gap: clamp(1rem, 2.5vw, 1.35rem);
 }
 
 @media (max-width: 960px) {
@@ -389,7 +548,7 @@
 }
 
 .home-species-img {
-  height: 140px;
+  height: clamp(168px, 26vw, 248px);
   background-size: cover;
   background-position: center;
 }
@@ -497,7 +656,7 @@
 .home-footer {
   padding: 2rem clamp(1rem, 4vw, 2.5rem);
   background: var(--home-white);
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #292f69;
 }
 
 .home-footer-inner {
@@ -542,4 +701,127 @@
   display: flex;
   gap: 0.65rem;
   color: var(--home-navy);
+}
+
+/* —— Motion (hero / sections / cards; route shell uses global `.rp-route-outlet`) —— */
+@keyframes home-hero-title-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes home-hero-sub-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes home-section-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes home-card-pop {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .home-hero-title {
+    animation: home-hero-title-in 0.88s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .home-hero-sub {
+    animation: home-hero-sub-in 0.75s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .home-beaches {
+    animation: home-section-in 0.68s 0.08s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .home-marine {
+    animation: home-section-in 0.65s 0.05s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .home-newsletter {
+    animation: home-section-in 0.62s 0.04s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .home-footer {
+    animation: home-section-in 0.55s 0.06s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .home-marine-grid .home-species-card {
+    animation: home-card-pop 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .home-marine-grid .home-species-card:nth-child(1) {
+    animation-delay: 0.04s;
+  }
+  .home-marine-grid .home-species-card:nth-child(2) {
+    animation-delay: 0.08s;
+  }
+  .home-marine-grid .home-species-card:nth-child(3) {
+    animation-delay: 0.12s;
+  }
+  .home-marine-grid .home-species-card:nth-child(4) {
+    animation-delay: 0.16s;
+  }
+  .home-marine-grid .home-species-card:nth-child(5) {
+    animation-delay: 0.2s;
+  }
+  .home-marine-grid .home-species-card:nth-child(6) {
+    animation-delay: 0.24s;
+  }
+  .home-marine-grid .home-species-card:nth-child(7) {
+    animation-delay: 0.28s;
+  }
+  .home-marine-grid .home-species-card:nth-child(8) {
+    animation-delay: 0.32s;
+  }
+
+  .home-feature-card,
+  .home-beach-row,
+  .home-cta-card {
+    transition:
+      transform 0.28s ease,
+      box-shadow 0.28s ease;
+  }
+
+  .home-feature-card:hover,
+  .home-beach-row:hover {
+    transform: translateY(-3px);
+  }
+
+  .home-species-card {
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .home-species-card:hover {
+    transform: translateY(-2px);
+  }
 }

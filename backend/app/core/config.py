@@ -67,7 +67,7 @@ class Settings(BaseSettings):
     community_presign_ttl_seconds: int = Field(default=3600, ge=60, le=86400)
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=Path(__file__).resolve().parents[2] / ".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
     )

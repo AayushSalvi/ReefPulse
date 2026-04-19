@@ -3,14 +3,20 @@
  * Page-specific styles live next to each feature under src/features/<name>/*.css
  */
 :root {
-  --rp-navy: #1b254b;
+  --rp-navy: #292f69;
   --rp-navy-deep: #121a36;
-  --rp-lime: #dfff4f;
+  --rp-lime: #faff6c;
   --rp-lime-soft: #e8ff7a;
-  --rp-surface: #eef2fb;
+  --rp-surface: #292f69;
   --rp-white: #ffffff;
   --rp-muted: #8b9bb8;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-family:
+    Manrope,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Manrope,
+    sans-serif;
   color: #152238;
   background: var(--rp-surface);
 }
@@ -41,7 +47,6 @@ body {
   gap: 0.5rem 1.25rem;
   padding: 0.5rem clamp(1rem, 4vw, 2.5rem);
   background: var(--rp-navy);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .top-nav-brand {
@@ -72,7 +77,7 @@ body {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 10px;
-  color: rgba(255, 255, 255, 0.88);
+  color: #faff6c;
   text-decoration: none;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.06);
@@ -87,12 +92,6 @@ body {
   color: var(--rp-lime);
   border-color: rgba(223, 255, 79, 0.55);
   background: rgba(223, 255, 79, 0.08);
-}
-
-.top-nav-icon--ghost {
-  cursor: default;
-  opacity: 0.65;
-  pointer-events: none;
 }
 
 .top-nav-links {
@@ -111,11 +110,9 @@ body {
 .top-nav-link {
   font-size: 0.92rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.88);
+  color: #faff6c;
   text-decoration: none;
   padding: 0.35rem 0.15rem;
-  border-bottom: 2px solid transparent;
-  border-radius: 4px 4px 0 0;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -165,6 +162,74 @@ button.top-nav-link {
   background: var(--rp-surface);
 }
 
+/* —— Route transitions (Outlet wrapper keyed by pathname in AppLayout) —— */
+@keyframes rp-route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rp-route-soft {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.rp-route-outlet {
+  animation: rp-route-enter 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.page-content--bleed .rp-route-outlet {
+  animation-name: rp-route-soft;
+  animation-duration: 0.55s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rp-route-outlet {
+    animation: none !important;
+  }
+}
+
+/* —— Header micro-motion —— */
+.top-nav-brand,
+.top-nav-link,
+.top-nav-icon {
+  transition:
+    color 0.22s ease,
+    border-color 0.22s ease,
+    background-color 0.22s ease,
+    transform 0.2s ease;
+}
+
+.top-nav-icon:active {
+  transform: scale(0.94);
+}
+
+.top-nav-link:hover {
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .top-nav-brand,
+  .top-nav-link,
+  .top-nav-icon {
+    transition: none;
+  }
+
+  .top-nav-icon:active,
+  .top-nav-link:hover {
+    transform: none;
+  }
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -207,10 +272,8 @@ button.top-nav-link {
 .rp-page-title {
   margin: 0 0 1.25rem;
   padding: 1rem 1.25rem;
-  border-radius: 12px;
   background: linear-gradient(135deg, var(--rp-navy) 0%, #2a3766 100%);
   color: var(--rp-white);
-  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .rp-page-title h1 {

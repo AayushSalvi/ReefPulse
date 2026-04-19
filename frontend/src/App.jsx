@@ -24,6 +24,7 @@ import ExploreForecastRedirect from "./features/explore/ExploreForecastRedirect"
 import ExploreIndexPage from "./features/explore/ExploreIndexPage";
 import ExploreLayout from "./features/explore/ExploreLayout";
 import ExploreLocationPage from "./features/explore/ExploreLocationPage";
+import { ExploreMapsApiProvider } from "./features/explore/ExploreMapsApiContext";
 import HomeDashboardPage from "./features/home/HomeDashboardPage";
 import LegacyLocationRedirect from "./features/legacy/LegacyLocationRedirect";
 import MarineLifeDiscoveryPage from "./features/marine-life/MarineLifeDiscoveryPage";
@@ -47,7 +48,14 @@ function App() {
         </Route>
 
         {/* —— Other top-level app pages —— */}
-        <Route path="/marine-life" element={<MarineLifeDiscoveryPage />} />
+        <Route
+          path="/marine-life"
+          element={
+            <ExploreMapsApiProvider>
+              <MarineLifeDiscoveryPage />
+            </ExploreMapsApiProvider>
+          }
+        />
         <Route path="/dashboard" element={<UserDashboardPage />} />
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/challenges" element={<ChallengesPage />} />

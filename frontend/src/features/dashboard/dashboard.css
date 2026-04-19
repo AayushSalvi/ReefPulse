@@ -370,3 +370,41 @@
   line-height: 1.55;
   color: #64748b;
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  .dash-card,
+  .dash-species-card,
+  .dash-sighting,
+  .dash-explore-card {
+    transition:
+      transform 0.22s ease,
+      box-shadow 0.22s ease,
+      border-color 0.22s ease;
+  }
+
+  .dash-card:hover,
+  .dash-species-card:hover,
+  .dash-sighting:hover,
+  .dash-explore-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(27, 37, 75, 0.08);
+  }
+
+  .dash-hero-actions a,
+  .dash-hero-actions button {
+    transition: transform 0.18s ease, opacity 0.2s ease;
+  }
+
+  .dash-hero-actions a:active,
+  .dash-hero-actions button:active {
+    transform: scale(0.98);
+  }
+
+  .dash-actions a {
+    transition: transform 0.18s ease, opacity 0.2s ease;
+  }
+
+  .dash-actions a:active {
+    transform: scale(0.98);
+  }
+}

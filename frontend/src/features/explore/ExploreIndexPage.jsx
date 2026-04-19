@@ -4,39 +4,19 @@
  * Route: `/explore` (nested default child of `ExploreLayout`)
  * Styles: `./explore-app.css` (inherited from parent import chain)
  *
- * Content:
- *   1) Static map hero card (prompt to use sidebar)
- *   2) “Top safety picks” grid linking to `/explore/:locationId`
+ * Content: live map (Google or OpenStreetMap) + lat/lng; sidebar lists beaches and forecast from pin.
  */
-import { Link } from "react-router-dom";
-import { locationsBySafety } from "../../data/mockData";
+import ExploreGoogleMapPanel from "./ExploreGoogleMapPanel";
 import "./explore-app.css";
 
 function ExploreIndexPage() {
-  const top = locationsBySafety().slice(0, 6);
   return (
     <div>
-      {/* —— Map-style hero (entry state) —— */}
-      <div className="ex-map-card">
-        <div className="ex-map-visual">
-          <div className="ex-map-caption">California coast · Select a beach from the sidebar</div>
-        </div>
-      </div>
-
-      {/* —— Curated quick links —— */}
-      <p style={{ margin: "0.5rem 0", fontWeight: 800, fontSize: "0.75rem", color: "#64748b", letterSpacing: "0.06em" }}>
-        TOP SAFETY PICKS
+      <ExploreGoogleMapPanel />
+      <p className="ex-index-after-map">
+        Use the sidebar to search California beaches or ReefPulse spots. After you set a pin, your latitude and
+        longitude appear in the sidebar with a <strong>See forecast</strong> shortcut to the nearest beach tab.
       </p>
-      <div className="ex-index-grid">
-        {top.map((beach) => (
-          <Link key={beach.id} to={`/explore/${beach.id}`} className="ex-index-card">
-            <strong style={{ color: "#1b254b" }}>{beach.name}</strong>
-            <p style={{ margin: "0.35rem 0 0", fontSize: "0.82rem", color: "#64748b" }}>
-              {beach.region} · Safety {beach.safetyIndex}
-            </p>
-          </Link>
-        ))}
-      </div>
     </div>
   );
 }
