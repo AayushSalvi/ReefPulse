@@ -15,6 +15,8 @@ class User(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     external_key: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
+    email: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True)
+    password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     handle: Mapped[str] = mapped_column(String(128), default="Snorkeler")
 
     posts: Mapped[list["Post"]] = relationship(back_populates="author_user")

@@ -4,7 +4,8 @@
  * Single-row header: brand → main nav → icon shortcuts (Saved, Alerts, Dashboard).
  * `/saved` via bookmark and bell; `/dashboard` via the user icon on the right.
  */
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 
 /** Main nav items (beach-first IA). */
 const navItems = [
@@ -42,6 +43,8 @@ function IconUser() {
 
 function AppLayout() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { user, loading, logout } = useAuth();
   const isHome = pathname === "/";
   const fullBleed = isHome;
 
@@ -94,6 +97,31 @@ function AppLayout() {
             <IconUser />
             <span className="visually-hidden">Dashboard</span>
           </NavLink>
+          {loading ? (
+            <span className="top-nav-user" aria-live="polite">
+              …
+            </span>
+          ) : user ? (
+            <>
+              <span className="top-nav-user" title={user.email || user.id}>
+                {user.handle}
+              </span>
+              <button
+                type="button"
+                className="top-nav-link"
+                onClick={async () => {
+                  await logout();
+                  navigate("/", { replace: true });
+                }}
+              >
+                Log out
+              </button>
+            </>
+          ) : (
+            <NavLink to="/login" className="top-nav-link" state={{ from: { pathname } }}>
+              Log in
+            </NavLink>
+          )}
         </div>
       </header>
 

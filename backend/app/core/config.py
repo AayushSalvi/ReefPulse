@@ -38,6 +38,20 @@ class Settings(BaseSettings):
         description="HS256 secret for Bearer tokens (sub = user UUID).",
     )
     jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = Field(
+        default=60 * 24 * 7,
+        ge=5,
+        le=60 * 24 * 30,
+        description="Access token lifetime in minutes.",
+    )
+    allow_registration: bool = Field(
+        default=True,
+        description="If false, POST /auth/register returns 403.",
+    )
+    cors_origins: str = Field(
+        default="http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174",
+        description="Comma-separated origins for CORS (dev SPA).",
+    )
     community_upload_max_bytes: int = Field(
         default=8_388_608,
         description="Max declared size for a single community image upload (presign).",
