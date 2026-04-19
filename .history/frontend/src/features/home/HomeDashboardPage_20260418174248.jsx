@@ -12,14 +12,7 @@ import "./home.css";
 
 function IconGlobe() {
   return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <circle cx="12" cy="12" r="10" />
       <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
     </svg>
@@ -28,14 +21,7 @@ function IconGlobe() {
 
 function IconAnchor() {
   return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M12 22V8" />
       <path d="M5 12H2a10 10 0 0 0 20 0h-3" />
       <circle cx="12" cy="5" r="3" />
@@ -46,7 +32,7 @@ function IconAnchor() {
 const beachThumbs = [
   "https://images.unsplash.com/photo-1519046904884-73407deabb2f?w=200&q=80",
   "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=200&q=80",
-  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200&q=80",
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200&q=80"
 ];
 
 const species = [
@@ -55,29 +41,29 @@ const species = [
     tag: "Migration High",
     tagClass: "home-tag--teal",
     desc: "Peak sightings along kelp corridors this week.",
-    img: "https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f?w=400&q=80",
+    img: "https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f?w=400&q=80"
   },
   {
     name: "Humpback Whales",
     tag: "Seasonal",
     tagClass: "home-tag--blue",
     desc: "Migrating pods reported off central coast.",
-    img: "https://images.unsplash.com/photo-1568430465619-251d0d42ad5e?w=400&q=80",
+    img: "https://images.unsplash.com/photo-1568430465619-251d0d42ad5e?w=400&q=80"
   },
   {
     name: "Moon Jellyfish",
     tag: "Warning",
     tagClass: "home-tag--warn",
     desc: "Watch for sting hazards near shore breaks.",
-    img: "https://images.unsplash.com/photo-1545671913-43e4dbec73b4?w=400&q=80",
+    img: "https://images.unsplash.com/photo-1545671913-43e4dbec73b4?w=400&q=80"
   },
   {
     name: "Pacific Sardines",
     tag: "Bait Ball",
     tagClass: "home-tag--blue",
     desc: "Dense schools — great for divers, watch boat traffic.",
-    img: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80",
-  },
+    img: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80"
+  }
 ];
 
 function HomeDashboardPage() {
@@ -93,14 +79,36 @@ function HomeDashboardPage() {
           ReefPulse
         </h1>
         <p className="home-hero-sub">Know the Ocean Before You Go</p>
+
+        <div className="home-live-bar" role="status">
+          <div className="home-live-label">
+            <span className="home-live-dot" aria-hidden />
+            LIVE NOW
+          </div>
+          <div className="home-live-stat">
+            <strong>Average wave height</strong>
+            <span>1.4 m</span>
+            <small>Consistent</small>
+          </div>
+          <div className="home-live-stat">
+            <strong>Surface temp</strong>
+            <span>22.4 °C</span>
+            <small>Optimal</small>
+          </div>
+          <div className="home-live-stat">
+            <strong>Pacific safety score</strong>
+            <span>94 / 100</span>
+          </div>
+          <div className="home-live-stat">
+            <strong>Active hazards</strong>
+            <span>0</span>
+            <small>Clear skies</small>
+          </div>
+        </div>
       </section>
 
       {/* —— Safest beaches grid (driven by mock safety sort) —— */}
-      <section
-        className="home-beaches"
-        id="coastal-map"
-        aria-labelledby="beaches-heading"
-      >
+      <section className="home-beaches" id="coastal-map" aria-labelledby="beaches-heading">
         <div className="home-section-head">
           <div>
             <p className="home-kicker">TOP RATED LOCATIONS</p>
@@ -119,24 +127,18 @@ function HomeDashboardPage() {
             <div className="home-feature-body">
               <h3>{topBeach.name}</h3>
               <p>
-                {topBeach.region} — calm conditions for swimming and snorkeling.
-                Safety index {topBeach.safetyIndex}.
+                {topBeach.region} — calm conditions for swimming and snorkeling. Safety index{" "}
+                {topBeach.safetyIndex}.
               </p>
             </div>
           </Link>
 
           <div className="home-side-stack">
             {nextBeaches.map((b, i) => (
-              <Link
-                key={b.id}
-                to={`/explore/${b.id}`}
-                className="home-beach-row"
-              >
+              <Link key={b.id} to={`/explore/${b.id}`} className="home-beach-row">
                 <div
                   className="home-beach-thumb"
-                  style={{
-                    backgroundImage: `url(${beachThumbs[i % beachThumbs.length]})`,
-                  }}
+                  style={{ backgroundImage: `url(${beachThumbs[i % beachThumbs.length]})` }}
                   role="img"
                   aria-hidden
                 />
@@ -175,10 +177,7 @@ function HomeDashboardPage() {
         <div className="home-marine-grid">
           {species.map((s) => (
             <article key={s.name} className="home-species-card">
-              <div
-                className="home-species-img"
-                style={{ backgroundImage: `url(${s.img})` }}
-              />
+              <div className="home-species-img" style={{ backgroundImage: `url(${s.img})` }} />
               <div className="home-species-body">
                 <span className={`home-tag ${s.tagClass}`}>{s.tag}</span>
                 <h4>{s.name}</h4>
@@ -193,22 +192,14 @@ function HomeDashboardPage() {
       <section className="home-newsletter" aria-labelledby="newsletter-heading">
         <div className="home-newsletter-inner">
           <p id="newsletter-heading">
-            Never miss a pulse. Get real-time safety alerts and marine
-            conservation updates delivered to your device.
+            Never miss a pulse. Get real-time safety alerts and marine conservation updates
+            delivered to your device.
           </p>
-          <form
-            className="home-newsletter-form"
-            onSubmit={(e) => e.preventDefault()}
-          >
+          <form className="home-newsletter-form" onSubmit={(e) => e.preventDefault()}>
             <label htmlFor="home-email" className="visually-hidden">
               Email
             </label>
-            <input
-              id="home-email"
-              type="email"
-              placeholder="Enter your email"
-              autoComplete="email"
-            />
+            <input id="home-email" type="email" placeholder="Enter your email" autoComplete="email" />
             <button type="submit">Subscribe</button>
           </form>
         </div>
@@ -218,9 +209,7 @@ function HomeDashboardPage() {
         <div className="home-footer-inner">
           <div>
             <div className="home-footer-brand">ReefPulse</div>
-            <p className="home-footer-copy">
-              © 2026 ReefPulse Monitoring Systems
-            </p>
+            <p className="home-footer-copy">© 2026 ReefPulse Monitoring Systems</p>
           </div>
           <nav className="home-footer-links" aria-label="Footer">
             <Link to="/explore">Explore</Link>

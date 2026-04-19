@@ -28,8 +28,7 @@
 /* —— Hero —— */
 .home-hero {
   text-align: center;
-  padding: clamp(16rem, 18vw, 28rem) 1.25rem clamp(16rem, 28vw, 22rem);
-  min-height: 140vh;
+  padding: clamp(10rem, 10vw, 20rem) 1.25rem clamp(10rem, 20vw, 14rem);
   background: linear-gradient(
     180deg,
     var(--home-navy) 0%,
@@ -48,9 +47,9 @@
 
 .home-hero-sub {
   margin: 0.75rem 0 0;
-  font-size: clamp(2.5rem, 8vw, 4.25rem);
+  font-size: clamp(1rem, 2.5vw, 1.35rem);
   font-weight: 500;
-  color: var(--home-lim);
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .home-live-bar {
@@ -538,127 +537,4 @@
   display: flex;
   gap: 0.65rem;
   color: var(--home-navy);
-}
-
-/* —— Motion (hero / sections / cards; route shell uses global `.rp-route-outlet`) —— */
-@keyframes home-hero-title-in {
-  from {
-    opacity: 0;
-    transform: translateY(28px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes home-hero-sub-in {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes home-section-in {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes home-card-pop {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .home-hero-title {
-    animation: home-hero-title-in 0.88s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  .home-hero-sub {
-    animation: home-hero-sub-in 0.75s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  .home-beaches {
-    animation: home-section-in 0.68s 0.08s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  .home-marine {
-    animation: home-section-in 0.65s 0.05s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  .home-newsletter {
-    animation: home-section-in 0.62s 0.04s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  .home-footer {
-    animation: home-section-in 0.55s 0.06s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  .home-marine-grid .home-species-card {
-    animation: home-card-pop 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  .home-marine-grid .home-species-card:nth-child(1) {
-    animation-delay: 0.04s;
-  }
-  .home-marine-grid .home-species-card:nth-child(2) {
-    animation-delay: 0.08s;
-  }
-  .home-marine-grid .home-species-card:nth-child(3) {
-    animation-delay: 0.12s;
-  }
-  .home-marine-grid .home-species-card:nth-child(4) {
-    animation-delay: 0.16s;
-  }
-  .home-marine-grid .home-species-card:nth-child(5) {
-    animation-delay: 0.2s;
-  }
-  .home-marine-grid .home-species-card:nth-child(6) {
-    animation-delay: 0.24s;
-  }
-  .home-marine-grid .home-species-card:nth-child(7) {
-    animation-delay: 0.28s;
-  }
-  .home-marine-grid .home-species-card:nth-child(8) {
-    animation-delay: 0.32s;
-  }
-
-  .home-feature-card,
-  .home-beach-row,
-  .home-cta-card {
-    transition:
-      transform 0.28s ease,
-      box-shadow 0.28s ease;
-  }
-
-  .home-feature-card:hover,
-  .home-beach-row:hover {
-    transform: translateY(-3px);
-  }
-
-  .home-species-card {
-    transition:
-      transform 0.25s ease,
-      box-shadow 0.2s ease;
-  }
-
-  .home-species-card:hover {
-    transform: translateY(-2px);
-  }
 }

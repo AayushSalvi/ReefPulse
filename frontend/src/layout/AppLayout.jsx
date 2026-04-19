@@ -97,7 +97,9 @@ function AppLayout() {
       </header>
 
       <main className={fullBleed ? "page-content page-content--bleed" : "page-content page-content--app"}>
-        <Outlet />
+        <div key={pathname} className="rp-route-outlet">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

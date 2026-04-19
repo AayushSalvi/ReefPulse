@@ -293,3 +293,34 @@
   background: #e0f2fe;
   color: #0369a1;
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  .comm-compose,
+  .comm-card {
+    transition:
+      box-shadow 0.25s ease,
+      transform 0.22s ease;
+  }
+
+  .comm-compose:hover,
+  .comm-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(27, 37, 75, 0.08);
+  }
+
+  .comm-chip,
+  .comm-sort-btn,
+  .comm-post-btn {
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease,
+      transform 0.16s ease;
+  }
+
+  .comm-chip:active,
+  .comm-sort-btn:active,
+  .comm-post-btn:active {
+    transform: scale(0.97);
+  }
+}

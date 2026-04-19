@@ -51,23 +51,16 @@ export async function searchCaBeachesDatastoreSql(searchText, opts = {}) {
     `(LOWER("Beach_Name") LIKE LOWER('${prefixLike}')) DESC,`,
     `(LOWER("NearestCityName") LIKE LOWER('${prefixLike}')) DESC,`,
     `"Beach_Name"`,
-    `LIMIT ${limit}`,
+    `LIMIT ${limit}`
   ].join(" ");
 
   const url = `${actionBaseUrl()}/datastore_search_sql?sql=${encodeURIComponent(sql)}`;
 
   let res;
   try {
-    res = await fetch(url, {
-      signal: opts.signal,
-      headers: { Accept: "application/json" },
-    });
+    res = await fetch(url, { signal: opts.signal, headers: { Accept: "application/json" } });
   } catch (e) {
-    return {
-      success: false,
-      records: [],
-      error: e instanceof Error ? e.message : "Network error",
-    };
+    return { success: false, records: [], error: e instanceof Error ? e.message : "Network error" };
   }
 
   let json;
@@ -78,23 +71,101 @@ export async function searchCaBeachesDatastoreSql(searchText, opts = {}) {
   }
 
   if (!res.ok) {
-    return {
-      success: false,
-      records: [],
-      error: json?.error?.message || `HTTP ${res.status}`,
-    };
+    return { success: false, records: [], error: json?.error?.message || `HTTP ${res.status}` };
   }
 
   if (!json.success) {
-    return {
-      success: false,
-      records: [],
-      error: json?.error?.message || "CKAN action failed",
-    };
+    return { success: false, records: [], error: json?.error?.message || "CKAN action failed" };
   }
 
   const records = json?.result?.records;
   return { success: true, records: Array.isArray(records) ? records : [] };
+}
+
+/**
+ * Alphabetical sample of monitored beaches (no search fragment required).
+ * @param {{ limit?: number, signal?: AbortSignal }} [opts]
+ */
+export async function listCaBeachesAlphabetical(opts = {}) {
+  const limit = Math.min(Math.max(Number(opts.limit) || 30, 1), 100);
+  const sql = [
+    `SELECT * FROM "${DATASTORE_RESOURCE_ID}"`,
+    `ORDER BY "Beach_Name" ASC`,
+    `LIMIT ${limit}`
+  ].join(" ");
+
+  const url = `${actionBaseUrl()}/datastore_search_sql?sql=${encodeURIComponent(sql)}`;
+  let res;
+  try {
+    res = await fetch(url, { signal: opts.signal, headers: { Accept: "application/json" } });
+  } catch (e) {
+    return { success: false, records: [], error: e instanceof Error ? e.message : "Network error" };
+  }
+
+  let json;
+  try {
+    json = await res.json();
+  } catch {
+    return { success: false, records: [], error: "Invalid JSON response" };
+  }
+
+  if (!res.ok) {
+    return { success: false, records: [], error: json?.error?.message || `HTTP ${res.status}` };
+  }
+  if (!json.success) {
+    return { success: false, records: [], error: json?.error?.message || "CKAN action failed" };
+  }
+
+  const records = json?.result?.records;
+  return { success: true, records: Array.isArray(records) ? records : [] };
+}
+
+const CA_EXPLORE_ID = /^ca-beach-([A-Za-z0-9_-]{1,48})$/;
+
+/**
+ * Load one beach row for `/explore/ca-beach-…` URLs.
+ * @param {string} exploreId e.g. `ca-beach-326`
+ * @param {{ signal?: AbortSignal }} [opts]
+ * @returns {Promise<{ success: boolean, record: object | null, error?: string }>}
+ */
+export async function fetchCaBeachByExploreId(exploreId, opts = {}) {
+  const m = String(exploreId || "").match(CA_EXPLORE_ID);
+  if (!m) {
+    return { success: false, record: null, error: null };
+  }
+  const rawKey = m[1].replace(/'/g, "''");
+  const sql = [
+    `SELECT * FROM "${DATASTORE_RESOURCE_ID}"`,
+    `WHERE CAST("BeachName_id" AS TEXT) = '${rawKey}'`,
+    `OR CAST("_id" AS TEXT) = '${rawKey}'`,
+    `LIMIT 1`
+  ].join(" ");
+
+  const url = `${actionBaseUrl()}/datastore_search_sql?sql=${encodeURIComponent(sql)}`;
+  let res;
+  try {
+    res = await fetch(url, { signal: opts.signal, headers: { Accept: "application/json" } });
+  } catch (e) {
+    return { success: false, record: null, error: e instanceof Error ? e.message : "Network error" };
+  }
+
+  let json;
+  try {
+    json = await res.json();
+  } catch {
+    return { success: false, record: null, error: "Invalid JSON response" };
+  }
+
+  if (!res.ok) {
+    return { success: false, record: null, error: json?.error?.message || `HTTP ${res.status}` };
+  }
+  if (!json.success) {
+    return { success: false, record: null, error: json?.error?.message || "CKAN action failed" };
+  }
+
+  const records = json?.result?.records;
+  const record = Array.isArray(records) && records[0] ? records[0] : null;
+  return { success: true, record, error: record ? undefined : "Not found" };
 }
 
 function numOrNull(v) {
@@ -112,9 +183,7 @@ function pickLatLower(rec) {
 }
 
 function pickLonUpper(rec) {
-  return numOrNull(
-    rec["Beach_ UpperLon"] ?? rec["Beach_UpperLon"] ?? rec["Beach_ UpperLon "],
-  );
+  return numOrNull(rec["Beach_ UpperLon"] ?? rec["Beach_UpperLon"] ?? rec["Beach_ UpperLon "]);
 }
 
 function pickLonLower(rec) {
@@ -126,9 +195,7 @@ function pickLonLower(rec) {
  * @returns {{ id: string, name: string, region: string, lat: number, lng: number, meta: string, raw: object }}
  */
 export function normalizeCaBeachRecord(rec) {
-  const name = String(
-    rec.Beach_Name || rec.Description || "Unknown beach",
-  ).trim();
+  const name = String(rec.Beach_Name || rec.Description || "Unknown beach").trim();
   const region = String(rec.County || rec.Agency_Name || "").trim();
   const latU = pickLatUpper(rec);
   const latL = pickLatLower(rec);
@@ -146,8 +213,7 @@ export function normalizeCaBeachRecord(rec) {
 
   const id = `ca-beach-${rec.BeachName_id ?? rec._id ?? "x"}`;
   const city = String(rec.NearestCityName || "").trim();
-  const meta =
-    [rec.WaterBodyType, city].filter(Boolean).join(" · ") || "data.ca.gov";
+  const meta = [rec.WaterBodyType, city].filter(Boolean).join(" · ") || "data.ca.gov";
 
   return {
     id,
@@ -156,6 +222,6 @@ export function normalizeCaBeachRecord(rec) {
     lat,
     lng,
     meta,
-    raw: rec,
+    raw: rec
   };
 }

@@ -1,5 +1,5 @@
 /**
- * Left sidebar search with typeahead (California datastore + demo beaches).
+ * Left sidebar search with typeahead (California monitored beaches, data.ca.gov).
  * Enter (no highlighted row) geocodes the text and moves/zooms the Google map on `/explore`.
  */
 import { useCallback, useEffect, useId, useRef, useState } from "react";
@@ -23,7 +23,7 @@ export default function ExploreSidebarSearchInput({
   typeaheadItems,
   typeaheadLoading = false,
   typeaheadError = null,
-  mapGeocodeEnabled = false,
+  mapGeocodeEnabled = false
 }) {
   const listId = useId();
   const inputRef = useRef(null);
@@ -33,10 +33,7 @@ export default function ExploreSidebarSearchInput({
   const [activeIdx, setActiveIdx] = useState(-1);
 
   const q = query.trim();
-  const showList =
-    open &&
-    q.length >= 1 &&
-    (typeaheadItems.length > 0 || typeaheadLoading || !!typeaheadError);
+  const showList = open && q.length >= 1 && (typeaheadItems.length > 0 || typeaheadLoading || !!typeaheadError);
 
   const applyMapFromLatLng = useCallback(
     (lat, lng, labelText) => {
@@ -49,33 +46,24 @@ export default function ExploreSidebarSearchInput({
           if (labelText) p.set("q", labelText);
           return p;
         },
-        { replace: true },
+        { replace: true }
       );
       if (labelText) setQuery(labelText);
     },
-    [setSearchParams, setQuery],
+    [setSearchParams, setQuery]
   );
 
   const runGeocodeForQuery = useCallback(
     (text) => {
-      if (
-        !mapGeocodeEnabled ||
-        !hasKey ||
-        !ready ||
-        !window.google?.maps?.Geocoder
-      )
-        return;
+      if (!mapGeocodeEnabled || !hasKey || !ready || !window.google?.maps?.Geocoder) return;
       const geocoder = new window.google.maps.Geocoder();
-      geocoder.geocode(
-        { address: `${text}, California, USA`, region: "us" },
-        (results, status) => {
-          if (status !== "OK" || !results?.[0]?.geometry?.location) return;
-          const loc = results[0].geometry.location;
-          applyMapFromLatLng(loc.lat(), loc.lng(), text);
-        },
-      );
+      geocoder.geocode({ address: `${text}, California, USA`, region: "us" }, (results, status) => {
+        if (status !== "OK" || !results?.[0]?.geometry?.location) return;
+        const loc = results[0].geometry.location;
+        applyMapFromLatLng(loc.lat(), loc.lng(), text);
+      });
     },
-    [applyMapFromLatLng, hasKey, mapGeocodeEnabled, ready],
+    [applyMapFromLatLng, hasKey, mapGeocodeEnabled, ready]
   );
 
   useEffect(() => {
@@ -102,12 +90,7 @@ export default function ExploreSidebarSearchInput({
     }
 
     if (e.key === "Enter") {
-      if (
-        showList &&
-        typeaheadItems.length > 0 &&
-        activeIdx >= 0 &&
-        activeIdx < typeaheadItems.length
-      ) {
+      if (showList && typeaheadItems.length > 0 && activeIdx >= 0 && activeIdx < typeaheadItems.length) {
         e.preventDefault();
         pick(typeaheadItems[activeIdx].onPick);
         return;
@@ -120,12 +103,7 @@ export default function ExploreSidebarSearchInput({
       }
     }
 
-    if (
-      !showList &&
-      (e.key === "ArrowDown" || e.key === "ArrowUp") &&
-      q.length >= 1 &&
-      typeaheadItems.length > 0
-    ) {
+    if (!showList && (e.key === "ArrowDown" || e.key === "ArrowUp") && q.length >= 1 && typeaheadItems.length > 0) {
       setOpen(true);
     }
     if (!showList || typeaheadItems.length === 0) return;
@@ -150,9 +128,7 @@ export default function ExploreSidebarSearchInput({
         role="combobox"
         aria-expanded={showList}
         aria-controls={showList ? `${listId}-listbox` : undefined}
-        aria-activedescendant={
-          activeIdx >= 0 ? `${listId}-opt-${activeIdx}` : undefined
-        }
+        aria-activedescendant={activeIdx >= 0 ? `${listId}-opt-${activeIdx}` : undefined}
         aria-autocomplete="list"
         value={query}
         onChange={(e) => {
@@ -180,10 +156,7 @@ export default function ExploreSidebarSearchInput({
           onMouseDown={(e) => e.preventDefault()}
         >
           {typeaheadError && (
-            <div
-              className="ex-typeahead-status ex-typeahead-status--error"
-              role="status"
-            >
+            <div className="ex-typeahead-status ex-typeahead-status--error" role="status">
               {typeaheadError}
             </div>
           )}
@@ -196,9 +169,7 @@ export default function ExploreSidebarSearchInput({
             !typeaheadError &&
             typeaheadItems.length === 0 &&
             q.length >= 1 && (
-              <div className="ex-typeahead-status">
-                No matches yet — keep typing or try another spelling.
-              </div>
+              <div className="ex-typeahead-status">No matches yet — keep typing or try another spelling.</div>
             )}
           {typeaheadItems.map((item, idx) => (
             <button
@@ -212,12 +183,8 @@ export default function ExploreSidebarSearchInput({
               onClick={() => pick(item.onPick)}
             >
               <span className="ex-typeahead-title">{item.title}</span>
-              {item.kind === "ca" && (
-                <span className="ex-typeahead-badge">CA data</span>
-              )}
-              {item.kind === "mock" && (
-                <span className="ex-typeahead-badge">Demo</span>
-              )}
+              {item.kind === "ca" && <span className="ex-typeahead-badge">CA data</span>}
+              {item.kind === "mock" && <span className="ex-typeahead-badge">Demo</span>}
               <span className="ex-typeahead-sub">{item.subtitle}</span>
             </button>
           ))}

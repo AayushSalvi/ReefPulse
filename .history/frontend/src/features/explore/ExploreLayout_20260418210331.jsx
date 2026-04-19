@@ -27,7 +27,6 @@ import {
   findLocation,
   locations,
   nearbyLocations,
-  nearestLocation,
   savedPlaces,
 } from "../../data/mockData";
 import { ExploreMapsApiProvider } from "./ExploreMapsApiContext";
@@ -193,12 +192,6 @@ function ExploreLayout() {
 
   const neighbors = locationId ? nearbyLocations(locationId, 5) : [];
   const saved = savedPlaces();
-
-  const mapLat = parseFloat(sp.get("mlat") || "");
-  const mapLng = parseFloat(sp.get("mlng") || "");
-  const mapHasCoords = Number.isFinite(mapLat) && Number.isFinite(mapLng);
-  const nearestForForecast =
-    !locationId && mapHasCoords ? nearestLocation(mapLat, mapLng) : null;
   const tabLabel =
     tab && tab !== "overview"
       ? tab.charAt(0).toUpperCase() + tab.slice(1)
@@ -331,7 +324,8 @@ function ExploreLayout() {
             <div className="ex-label">Results</div>
             {hideCaLive && (
               <p className="ex-sidebar-hint">
-                California database search is off while activity filters are on.
+                California database search is off while activity or demo-only
+                filters are on.
               </p>
             )}
             <ul className="ex-beach-list">
@@ -401,37 +395,6 @@ function ExploreLayout() {
                 </li>
               ))}
             </ul>
-
-            {!locationId && mapHasCoords && (
-              <>
-                <div className="ex-label">Map pin</div>
-                <div className="ex-sidebar-map-pos" aria-live="polite">
-                  <div className="ex-sidebar-coord-row">
-                    <span className="ex-sidebar-coord-label">Latitude</span>
-                    <code className="ex-sidebar-coord-value">{mapLat.toFixed(6)}</code>
-                  </div>
-                  <div className="ex-sidebar-coord-row">
-                    <span className="ex-sidebar-coord-label">Longitude</span>
-                    <code className="ex-sidebar-coord-value">{mapLng.toFixed(6)}</code>
-                  </div>
-                </div>
-                {nearestForForecast && (
-                  <div className="ex-sidebar-forecast-wrap">
-                    <Link
-                      to={`/explore/${nearestForForecast.location.id}?tab=forecast`}
-                      className="ex-sidebar-forecast-btn"
-                    >
-                      See forecast
-                    </Link>
-                    <p className="ex-sidebar-forecast-note">
-                      For this pin we open the forecast tab for the nearest ReefPulse beach:{" "}
-                      <strong>{nearestForForecast.location.name}</strong> (~
-                      {nearestForForecast.distanceKm.toFixed(1)} km away).
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
 
             <div className="ex-sidebar-foot">
               <Link to="/community">Community</Link>

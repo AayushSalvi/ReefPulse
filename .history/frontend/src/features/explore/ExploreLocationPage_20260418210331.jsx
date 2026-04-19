@@ -1,19 +1,20 @@
 /**
  * ReefPulse — Explore location detail (main decision page)
  *
- * Route: `/explore/:locationId`  ·  Query: `?tab=overview|forecast|community` (default overview)
+ * Route: `/explore/:locationId`  ·  Query: `?tab=overview|past|forecast|community` (default overview)
  * Styles: `./explore-app.css`
  *
  * Layout:
- *   - Center column: map card, floating advisory, tab bar, tab panels
+ *   - Center column: map card, floating advisory, planning chips (Past/Now/Future), tab bar, tab panels
  *   - Right rail (`ex-rail`): community pulse + quick alert digest
  *
  * Tabs (IA):
  *   Overview — snapshot + verdict + hazards + species on radar
- *   Forecast — 14-day future outlook in one scrollable row (hazard & bloom chips + species)
+ *   Past — narrative + timeline slider (demo)
+ *   Forecast — compare blocks + 7-day chips + species probability (demo)
  *   Community — local posts with photo placeholders + tips
  */
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
 import {
   findLocation,
@@ -26,6 +27,7 @@ import "./explore-app.css";
 /** Tab ids must match `?tab=` values (overview omits query param when default). */
 const TABS = [
   { id: "overview", label: "Overview" },
+  { id: "past", label: "Past" },
   { id: "forecast", label: "Forecast" },
   { id: "community", label: "Community" },
 ];
@@ -54,9 +56,10 @@ function ExploreLocationPage() {
   const { locationId } = useParams();
   const [sp, setSp] = useSearchParams();
   const location = findLocation(locationId);
-  const rawTab = sp.get("tab");
-  const tab = rawTab === "past" ? "overview" : rawTab || "overview";
-  const planning = tab === "forecast" ? "future" : "present";
+  const tab = sp.get("tab") || "overview";
+  const planning =
+    tab === "past" ? "past" : tab === "forecast" ? "future" : "present";
+  const [pastDays, setPastDays] = useState(7);
 
   const speciesProb = useMemo(() => {
     if (!location?.speciesPreview) return [];
@@ -70,15 +73,6 @@ function ExploreLocationPage() {
     return <Navigate to="/explore" replace />;
   }
 
-  if (rawTab === "past") {
-    const next = new URLSearchParams(sp);
-    next.delete("tab");
-    const qs = next.toString();
-    return (
-      <Navigate to={`/explore/${locationId}${qs ? `?${qs}` : ""}`} replace />
-    );
-  }
-
   const setTab = (id) => {
     const next = new URLSearchParams(sp);
     if (id === "overview") next.delete("tab");
@@ -86,7 +80,7 @@ function ExploreLocationPage() {
     setSp(next, { replace: true });
   };
 
-  const future14 = forecastOutlook.slice(0, 14);
+  const week = forecastOutlook.slice(0, 7);
   const localSightings = sightingsForLocation(location.id);
   const verdict = snorkelRecommendation(location);
   const railSightings = localSightings.length
@@ -142,6 +136,32 @@ function ExploreLocationPage() {
               )}
             </aside>
 
+            {/* Past / Now / Future — drives same tabs (shorthand for time context) */}
+            <div className="ex-planning">
+              <span>Planning</span>
+              <button
+                type="button"
+                className={planning === "past" ? "is-on" : ""}
+                onClick={() => setTab("past")}
+              >
+                Past
+              </button>
+              <button
+                type="button"
+                className={planning === "present" ? "is-on" : ""}
+                onClick={() => setTab("overview")}
+              >
+                Now
+              </button>
+              <button
+                type="button"
+                className={planning === "future" ? "is-on" : ""}
+                onClick={() => setTab("forecast")}
+              >
+                Future
+              </button>
+            </div>
+
             {/* Primary IA tabs */}
             <div className="ex-tabs" role="tablist">
               {TABS.map((t) => (
@@ -164,7 +184,11 @@ function ExploreLocationPage() {
                 <div className="ex-panel">
                   <h3>Location overview</h3>
                   <p className="ex-lede">
-                    {location.name} — {location.region}. Quick read for current conditions.
+                    {location.name} — {location.region}. Quick read for{" "}
+                    {planning === "present"
+                      ? "right now"
+                      : "your selected window"}
+                    .
                   </p>
                   <p>
                     <strong>Safety index:</strong> {location.safetyIndex}/100 ·{" "}
@@ -204,12 +228,88 @@ function ExploreLocationPage() {
                 </div>
               )}
 
+              {tab === "past" && (
+                <div className="ex-panel">
+                  <h3>Past conditions</h3>
+                  <p>
+                    Weather: typical onshore flow afternoons; mornings calmer.
+                    Ocean: max waves last week ~{" "}
+                    {(location.waveFt + 0.8).toFixed(1)} ft; water ranged{" "}
+                    {location.waterTempF - 2}–{location.waterTempF + 1}
+                    °F.
+                  </p>
+                  <p>
+                    Species logged by snorkelers:{" "}
+                    {location.speciesPreview.join(", ")} (consistent with
+                    seasonal norms).
+                  </p>
+                  <label
+                    htmlFor="past-range"
+                    style={{
+                      fontSize: "0.85rem",
+                      fontWeight: 700,
+                      color: "#475569",
+                    }}
+                  >
+                    Timeline — days back: {pastDays}
+                  </label>
+                  <input
+                    id="past-range"
+                    type="range"
+                    className="ex-past-slider"
+                    min={1}
+                    max={21}
+                    value={pastDays}
+                    onChange={(e) => setPastDays(Number(e.target.value))}
+                  />
+                  <p style={{ marginBottom: 0 }}>
+                    Demo slider — in a live app this would load observations and
+                    satellite summaries for the selected span.
+                  </p>
+                </div>
+              )}
+
               {tab === "forecast" && (
                 <div className="ex-panel">
-                  <h3>14-day forecast</h3>
-                  <p className="ex-lede" style={{ marginBottom: "0.75rem" }}>
-                    Forward-looking demo: fourteen days in a row (D+1 through D+14). Use{" "}
-                    <strong>Overview</strong> for current conditions at this beach.
+                  <h3>Forecast — plan ahead</h3>
+                  <div className="ex-forecast-compare">
+                    <div className="ex-forecast-block">
+                      <h4>Today</h4>
+                      <p style={{ margin: 0, fontSize: "0.8rem" }}>
+                        Safety score ~{location.safetyIndex}.{" "}
+                        {location.algalRisk} algal risk. Best if surf stays
+                        below {(location.waveFt + 0.3).toFixed(1)} ft.
+                      </p>
+                    </div>
+                    <div className="ex-forecast-block">
+                      <h4>Tomorrow</h4>
+                      <p style={{ margin: 0, fontSize: "0.8rem" }}>
+                        Calm water trend morning · medium visibility ·
+                        low–moderate algal risk on model run.
+                      </p>
+                    </div>
+                    <div className="ex-forecast-block">
+                      <h4>Weekend</h4>
+                      <p style={{ margin: 0, fontSize: "0.8rem" }}>
+                        Surf &amp; bloom indicators rise; compare tabs before
+                        committing to a long swim.
+                      </p>
+                    </div>
+                  </div>
+                  <p
+                    style={{
+                      fontWeight: 700,
+                      color: "#1b254b",
+                      marginBottom: "0.35rem",
+                    }}
+                  >
+                    Tomorrow morning (example)
+                  </p>
+                  <p style={{ marginBottom: "0.75rem" }}>
+                    Calm water, medium visibility, low algal risk — higher
+                    chance of {location.speciesPreview[0]} and{" "}
+                    {location.speciesPreview[1] || "nearshore fish"} (model
+                    confidence ~70%).
                   </p>
                   <p
                     style={{
@@ -219,10 +319,10 @@ function ExploreLocationPage() {
                       color: "#64748b",
                     }}
                   >
-                    Hazard &amp; bloom by day
+                    7-day hazard &amp; bloom
                   </p>
-                  <div className="ex-forecast-row ex-forecast-row--inline">
-                    {future14.map((d) => (
+                  <div className="ex-forecast-row">
+                    {week.map((d) => (
                       <div key={d.label} className="ex-forecast-chip">
                         <div style={{ fontWeight: 800, color: "#64748b" }}>
                           {d.short}
@@ -244,17 +344,24 @@ function ExploreLocationPage() {
                     ))}
                   </div>
                   <p>
-                    <strong>Best snorkeling window (model):</strong> favor early
-                    mornings in the lower-surf days below (D+1–D+4 in this demo)
-                    before wind fill — align with local tide tables in real use.
+                    <strong>Best snorkeling window:</strong> early mornings
+                    mid-week before wind fill — align with low tide if you are
+                    new to the site.
                   </p>
                   <p style={{ marginBottom: "0.35rem" }}>
-                    <strong>Species likelihood (next 14 days)</strong>
+                    <strong>
+                      Species likelihood (blend of history + forecast)
+                    </strong>
                   </p>
                   {speciesProb.map((row) => (
                     <p key={row.name} className="ex-spec-prob">
-                      {row.name}: ~{row.pct}% in favorable visibility over the
-                      next 14 days — illustrative demo.
+                      {row.name}: ~{row.pct}% in favorable vis (
+                      {planning === "future"
+                        ? "next 48h"
+                        : planning === "past"
+                          ? "same calendar week prior"
+                          : "today"}
+                      ) — illustrative demo.
                     </p>
                   ))}
                 </div>
