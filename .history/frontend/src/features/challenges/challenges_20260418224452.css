@@ -49,7 +49,7 @@
   padding: 1rem 1.15rem 1.05rem;
   border-radius: calc(var(--ch-radius) + 2px);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: #2b38b8;
+  background: linear-gradient(145deg, #0c1224 0%, #152a4a 38%, #0d5c56 92%, #0f766e 100%);
   color: #f1f5f9;
   box-shadow: 0 14px 40px rgba(15, 23, 42, 0.28);
 }
@@ -93,7 +93,7 @@
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1;
-  color: #faff6c;
+  color: #fff;
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.25);
 }
 
@@ -102,7 +102,7 @@
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #faff6c;
+  color: rgba(223, 255, 79, 0.95);
 }
 
 .ch-trophy-banner__tier {
@@ -176,7 +176,7 @@
 .ch-trophy-banner__fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #dfff4f, #faff6c);
+  background: linear-gradient(90deg, #dfff4f, #5eead4);
   box-shadow: 0 0 12px rgba(94, 234, 212, 0.45);
   transition: width 0.35s ease;
 }
@@ -397,9 +397,7 @@
   background: #fff;
   color: var(--rp-navy, #1b254b);
   cursor: pointer;
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .challenges-btn:hover {
