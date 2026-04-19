@@ -1,4 +1,4 @@
-﻿# Backend
+# Backend
 
 This backend scaffold follows the ReefPulse proposal:
 
@@ -11,3 +11,9 @@ This backend scaffold follows the ReefPulse proposal:
 - `repositories/` database / cache access
 
 The starting assumption is Python + FastAPI because the proposal leans heavily on Python data and ML tooling.
+
+## Model A (State Forecaster)
+
+Full runbook (windows → S3 → SageMaker → API): **`../docs/model-a/README.md`**
+
+Install ML extras: `pip install -e ".[model-a]"` (PyTorch, pandas, pyarrow).

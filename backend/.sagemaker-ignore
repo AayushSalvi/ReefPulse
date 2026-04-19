@@ -1,0 +1,10 @@
+# Exclude from SageMaker source tarball (see scripts/launch_model_a_sagemaker_training.py)
+.venv/
+**/__pycache__/
+**/*.pyc
+model_a_data/
+*.pt
+.pytest_cache/
+training/
+notebooks/
+*.ipynb
