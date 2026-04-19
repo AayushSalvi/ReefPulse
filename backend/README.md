@@ -16,6 +16,8 @@ The starting assumption is Python + FastAPI because the proposal leans heavily o
 
 **Model D** predicts **likelihoods for fish species found at a location**: the client sends **`latitude`/`longitude`**, optional **`date`**, and **`top_k`**; SageMaker returns **ranked species with likelihood scores** (exact JSON depends on your deployed model). The FastAPI route merges that with `location_slug` for the response.
 
+**Explore (fishdeck)** calls **`POST /api/v1/species/rank`**, which **tries SageMaker first** with the same lat/lon/date payload, maps the response into the fishdeck schema, and **falls back to the deterministic demo** if the endpoint is down or returns an unusable body.
+
 | Piece | Location |
 |-------|-----------|
 | HTTP route | `app/api/routes/species.py` → `GET …/species/{location_slug}` |

@@ -4,6 +4,8 @@
 import { createContext, useContext, useMemo } from "react";
 import { useJsApiLoader } from "@react-google-maps/api";
 
+import { resolveGoogleMapsApiKey } from "../../lib/googleMapsEnv";
+
 const ExploreMapsApiContext = createContext(null);
 
 function LoaderInner({ apiKey, children }) {
@@ -28,8 +30,7 @@ function LoaderInner({ apiKey, children }) {
 }
 
 export function ExploreMapsApiProvider({ children }) {
-  const raw = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  const apiKey = typeof raw === "string" ? raw.trim() : "";
+  const apiKey = resolveGoogleMapsApiKey(__INJECTED_GOOGLE_MAPS_KEY__);
 
   if (!apiKey) {
     return (

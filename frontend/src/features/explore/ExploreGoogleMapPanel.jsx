@@ -141,8 +141,10 @@ export default function ExploreGoogleMapPanel() {
           <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">
             OpenStreetMap
           </a>{" "}
-          embed below. Add <code className="ex-google-map-code">VITE_GOOGLE_MAPS_API_KEY</code> for Google Maps plus
-          sidebar geocode.
+          embed below. Set <code className="ex-google-map-code">VITE_GOOGLE_MAPS_API_KEY</code> or{" "}
+          <code className="ex-google-map-code">GOOGLE_MAPS_API_KEY</code> in{" "}
+          <code className="ex-google-map-code">frontend/.env</code>, repo root <code className="ex-google-map-code">.env</code>, or{" "}
+          <code className="ex-google-map-code">backend/.env</code>, then restart Vite.
         </p>
       )}
       {hasKey && loadError && (
