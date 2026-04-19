@@ -2,7 +2,7 @@
 name = "reefpulse-backend"
 version = "0.1.0"
 description = "Backend scaffold for the ReefPulse ocean intelligence platform"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
   "boto3>=1.34.0",
   "fastapi>=0.115.0",
@@ -29,6 +29,13 @@ training = [
   "seaborn>=0.13.2",
   "torch>=2.3.0",
 ]
+model-a = [
+  "torch>=2.2.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]

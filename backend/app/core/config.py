@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,6 +12,11 @@ class Settings(BaseSettings):
     api_prefix: str = "/api/v1"
     aws_region: str = "us-west-2"
     s3_bucket: str = "reefpulse-dev"
+    model_a_artifact_path: str | None = Field(
+        default=None,
+        description="Path to trained Model A checkpoint (.pt) with mean/std for local inference.",
+    )
+    model_a_mc_samples: int = 30
     sagemaker_endpoint_forecast: str = "forecast-endpoint"
     sagemaker_endpoint_hab: str = "hab-endpoint"
     sagemaker_endpoint_species: str = "species-endpoint"

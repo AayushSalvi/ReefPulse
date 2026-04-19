@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import json
+from dataclasses import dataclass
 from math import log
 from pathlib import Path
 from typing import Protocol
@@ -108,3 +108,16 @@ def load_model_b() -> SupportsReconstruction:
         return artifact_model
 
     return HeuristicAnomalyModel()
+
+
+# Model A (optional import; torch only needed when using checkpoints)
+from app.ml.model_a.inference import ModelAForecaster, load_forecaster
+
+__all__ = [
+    "HeuristicAnomalyModel",
+    "ModelAForecaster",
+    "ReconstructionResult",
+    "SupportsReconstruction",
+    "load_forecaster",
+    "load_model_b",
+]

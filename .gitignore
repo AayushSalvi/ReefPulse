@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -22,8 +22,13 @@ dist/
 build/
 coverage/
 htmlcov/
+*.egg-info/
 
-# Data / local artifacts
+# Data & ML artifacts (keep in S3; regenerate locally)
+*.npz
+*.pt
+*.parquet
+backend/model_a_data/
 data/
 tmp/
 logs/
