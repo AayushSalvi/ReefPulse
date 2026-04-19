@@ -15,9 +15,12 @@ const caDataGovProxy = {
 };
 
 /** Dev: forward ReefPulse REST (`/api/v1`) to FastAPI when `VITE_API_BASE_URL` is empty. */
+const reefpulseApiTarget =
+  process.env.VITE_API_PROXY_TARGET?.trim() || "http://127.0.0.1:8000";
+
 const reefpulseApiProxy = {
   "/api/v1": {
-    target: "http://127.0.0.1:8000",
+    target: reefpulseApiTarget,
     changeOrigin: true
   }
 };

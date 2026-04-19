@@ -1,0 +1,119 @@
+.rp-assistant {
+  padding: 1rem 1.25rem 2rem;
+  max-width: 720px;
+}
+
+.rp-assistant-hero h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #1b254b;
+}
+
+.rp-assistant-hero p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.rp-assistant-code {
+  font-size: 0.85em;
+  background: #f1f5f9;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+.rp-assistant-chat {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(27, 37, 75, 0.12);
+  background: #fafbff;
+  min-height: 200px;
+  max-height: min(52vh, 420px);
+  overflow-y: auto;
+}
+
+.rp-assistant-row {
+  margin-bottom: 1rem;
+}
+
+.rp-assistant-row:last-child {
+  margin-bottom: 0;
+}
+
+.rp-assistant-role {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 0.25rem;
+}
+
+.rp-assistant-row--user .rp-assistant-role {
+  color: #0f766e;
+}
+
+.rp-assistant-bubble {
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #0f172a;
+  background: #fff;
+  border: 1px solid rgba(27, 37, 75, 0.08);
+  white-space: pre-wrap;
+}
+
+.rp-assistant-row--user .rp-assistant-bubble {
+  background: rgba(15, 118, 110, 0.08);
+  border-color: rgba(15, 118, 110, 0.2);
+}
+
+.rp-assistant-row--err .rp-assistant-bubble {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.rp-assistant-model {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+.rp-assistant-form {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.rp-assistant-input {
+  width: 100%;
+  resize: vertical;
+  border-radius: 12px;
+  border: 1px solid rgba(27, 37, 75, 0.15);
+  padding: 0.65rem 0.85rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.rp-assistant-send {
+  align-self: flex-start;
+  padding: 0.55rem 1.25rem;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  background: #1b254b;
+  color: #f8fafc;
+}
+
+.rp-assistant-send:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

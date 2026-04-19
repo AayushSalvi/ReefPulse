@@ -2,9 +2,12 @@
  * ReefPulse — Community (desktop-first feed + sticky sidebar for filters & new post)
  *
  * Route: `/community`  ·  Styles: `./community.css`, `../explore/workflow.css`
+ * Feed: tries `GET /api/v1/community/posts` first (works without login — backend uses demo viewer); falls back to mock if the API is down.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../auth/AuthContext";
+import { fetchCommunityPosts, mapCommunityPostToSighting } from "../../api/communityFeed";
 import { getChallengeIconId } from "../../data/challengesData";
 import { communitySightingsFiltered, locations } from "../../data/mockData";
 import { ChallengeCardIcon } from "../challenges/challengeIcons";
@@ -250,7 +253,7 @@ function ComposerBlock({
       <div className="comm-panel-head">
         <span className="comm-panel-kicker">Share a sighting</span>
         <h2 className="comm-panel-title">New post</h2>
-        <p className="comm-panel-lead">Add a photo, beach, conditions, and tips — demo form clears on submit.</p>
+        <p className="comm-panel-lead">Add a photo, beach, conditions, and tips — form is demo-only at the hackathon.</p>
       </div>
 
       <div className="comm-compose-split comm-compose-split--sidebar">
@@ -356,13 +359,14 @@ function ComposerBlock({
         >
           Post (demo — clears form)
         </button>
-        <p className="comm-compose-hint">In production this would publish to the feed and maps.</p>
+        <p className="comm-compose-hint">Feed above is live from the API when the backend is running.</p>
       </div>
     </section>
   );
 }
 
 function CommunityPage() {
+  const { token } = useAuth();
   const [filter, setFilter] = useState("all");
   const [draft, setDraft] = useState("");
   const [species, setSpecies] = useState("");
@@ -375,7 +379,7 @@ function CommunityPage() {
   const [feedSort, setFeedSort] = useState("recent");
   const [aiNote, setAiNote] = useState("");
 
-  const feed = useMemo(
+  const mockFeed = useMemo(
     () =>
       communitySightingsFiltered({
         tag: filter,
@@ -385,6 +389,42 @@ function CommunityPage() {
       }),
     [filter, speciesFilter, feedLocation, feedSort]
   );
+
+  /** `idle` = first paint; `loading` = fetch in flight; `api` = use apiPosts; `mock` = API failed, use mockFeed */
+  const [feedMode, setFeedMode] = useState("idle");
+  const [apiPosts, setApiPosts] = useState([]);
+  const [apiFeedError, setApiFeedError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setFeedMode("loading");
+    setApiFeedError(null);
+    fetchCommunityPosts({
+      token: token || undefined,
+      tag: filter !== "all" ? filter : null,
+      locationId: feedLocation || null,
+      speciesQuery: speciesFilter || null,
+      sort: feedSort,
+      limit: 40
+    })
+      .then((data) => {
+        if (cancelled) return;
+        const posts = Array.isArray(data.posts) ? data.posts : [];
+        setApiPosts(posts.map(mapCommunityPostToSighting));
+        setFeedMode("api");
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setApiFeedError(e instanceof Error ? e.message : "Feed request failed");
+        setFeedMode("mock");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, filter, feedLocation, speciesFilter, feedSort]);
+
+  const feed = feedMode === "api" ? apiPosts : mockFeed;
+  const apiFeedLoading = feedMode === "loading" || feedMode === "idle";
 
   const filterProps = {
     filter,
@@ -452,14 +492,25 @@ function CommunityPage() {
           </div>
 
           <section className="comm-feed" aria-label="Sightings from the community">
-            {feed.length === 0 ? (
+            {feedMode === "mock" && apiFeedError ? (
+              <p className="comm-api-banner comm-api-banner--warn" role="status">
+                API unavailable ({apiFeedError.slice(0, 120)}). Showing static demo feed — start backend + Vite proxy.
+              </p>
+            ) : null}
+            {feedMode === "api" ? (
+              <p className="comm-api-banner" role="status">
+                Live feed from ReefPulse API
+              </p>
+            ) : null}
+            {apiFeedLoading ? <p className="comm-api-banner">Loading feed…</p> : null}
+            {feed.length === 0 && !apiFeedLoading ? (
               <div className="comm-empty">
                 <p className="comm-empty-title">No posts match these filters</p>
                 <p className="comm-empty-text">Try another tag, clear the search, or pick a different beach.</p>
               </div>
-            ) : (
+            ) : !apiFeedLoading ? (
               feed.map((s) => <FeedPost key={s.id} sighting={s} />)
-            )}
+            ) : null}
           </section>
 
           <div className="comm-mobile-only comm-mobile-only--after-feed">

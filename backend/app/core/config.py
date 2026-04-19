@@ -65,6 +65,18 @@ class Settings(BaseSettings):
         description="S3 key prefix for presigned uploads; keys must be {prefix}/{user_id}/...",
     )
     community_presign_ttl_seconds: int = Field(default=3600, ge=60, le=86400)
+    gemini_api_key: str | None = Field(
+        default=None,
+        description="Google AI Studio / Gemini API key for POST /chat/query (server-side only).",
+    )
+    gemini_model: str = Field(
+        default="gemini-2.5-flash",
+        description=(
+            "Model id for v1beta generateContent (no `models/` prefix). "
+            "Use gemini-2.5-flash for new keys; gemini-2.0-flash is deprecated for new users. "
+            "Fallbacks: gemini-2.5-flash-lite, gemini-1.5-flash."
+        ),
+    )
 
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parents[2] / ".env",

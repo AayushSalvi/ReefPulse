@@ -875,3 +875,18 @@
     transform: scale(0.97);
   }
 }
+
+.comm-api-banner {
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--comm-radius-sm);
+  background: var(--comm-teal-soft);
+  color: #0f3d39;
+  font-weight: 600;
+}
+
+.comm-api-banner--warn {
+  background: rgba(249, 115, 22, 0.12);
+  color: #9a3412;
+}
