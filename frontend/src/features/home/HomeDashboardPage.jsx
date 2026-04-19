@@ -394,6 +394,11 @@ function HomeDashboardPage() {
             ReefPulse
           </h1>
           <p className="home-hero-sub">Know the Ocean Before You Go</p>
+          <div className="home-hero-actions">
+            <Link to="/oracle" className="home-hero-oracle-btn">
+              Consult Ocean Oracle
+            </Link>
+          </div>
           <div ref={homeHeroFishFieldRef} className="home-hero-fish-field">
             <div
               ref={homeHeroFishSwimZoneRef}

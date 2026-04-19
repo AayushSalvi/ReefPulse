@@ -22,17 +22,8 @@
   margin-bottom: 0.35rem;
 }
 
-.comm-hero--minimal p {
-  margin: 0;
-  max-width: 40rem;
-  font-size: 0.92rem;
-  line-height: 1.55;
-  color: #64748b;
-  font-weight: 500;
-}
-
 .comm-hero__inline-link {
-  color: #0f766e;
+  color:#dfff4f;
   font-weight: 700;
   text-decoration: none;
 }

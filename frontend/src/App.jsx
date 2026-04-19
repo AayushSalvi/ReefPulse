@@ -27,6 +27,7 @@ import { ExploreMapsApiProvider } from "./features/explore/ExploreMapsApiContext
 import HomeDashboardPage from "./features/home/HomeDashboardPage";
 import LegacyLocationRedirect from "./features/legacy/LegacyLocationRedirect";
 import MarineLifeDiscoveryPage from "./features/marine-life/MarineLifeDiscoveryPage";
+import OceanOraclePage from "./features/oracle/OceanOraclePage";
 import UserDashboardPage from "./features/dashboard/UserDashboardPage";
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
       <Route element={<AppLayout />}>
         {/* —— Public / marketing home —— */}
         <Route path="/" element={<HomeDashboardPage />} />
+        <Route path="/oracle" element={<OceanOraclePage />} />
 
         {/* —— Explore: nested layout (sidebar + outlet) —— */}
         <Route path="/explore" element={<ExploreLayout />}>

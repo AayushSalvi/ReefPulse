@@ -148,6 +148,30 @@
   color: #faff6c;
 }
 
+.home-hero-actions {
+  position: relative;
+  z-index: 5;
+  margin-top: 1rem;
+}
+
+.home-hero-oracle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.72rem 1.2rem;
+  background: #dfff4f;
+  color: #1a2554;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.home-hero-oracle-btn:hover {
+  opacity: 1;
+  filter: brightness(1.03);
+}
+
 .home-live-bar {
   margin-top: clamp(2rem, 5vw, 3.5rem);
   margin-left: auto;
