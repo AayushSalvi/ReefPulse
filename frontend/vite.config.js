@@ -14,16 +14,26 @@ const caDataGovProxy = {
   }
 };
 
+/** Dev: forward ReefPulse REST (`/api/v1`) to FastAPI when `VITE_API_BASE_URL` is empty. */
+const reefpulseApiProxy = {
+  "/api/v1": {
+    target: "http://127.0.0.1:8000",
+    changeOrigin: true
+  }
+};
+
+const devProxy = { ...caDataGovProxy, ...reefpulseApiProxy };
+
 export default defineConfig({
   root: "src",
   /** Load `.env` from `frontend/` (not `frontend/src/`) while `root` is `src`. */
   envDir: __dirname,
   plugins: [react()],
   server: {
-    proxy: caDataGovProxy
+    proxy: devProxy
   },
   preview: {
-    proxy: caDataGovProxy
+    proxy: devProxy
   },
   build: {
     outDir: "../dist",

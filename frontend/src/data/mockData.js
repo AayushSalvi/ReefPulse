@@ -185,6 +185,16 @@ export function matchSpeciesQuery(query) {
   return values.find((s) => s.name.toLowerCase().includes(q) || q.includes(s.name.toLowerCase().split(" ")[0])) || null;
 }
 
+/** Species “cards” for a beach: `speciesPreview` names + optional `SPECIES_BY_ID` profile (image, hint). */
+export function locationSpeciesDeck(location) {
+  if (!location?.speciesPreview?.length) return [];
+  return location.speciesPreview.map((name, index) => ({
+    id: `${location.id}-deck-${index}`,
+    name,
+    profile: matchSpeciesQuery(name),
+  }));
+}
+
 const RAW_SIGHTINGS = [
   {
     id: "s1",
@@ -460,5 +470,11 @@ export const forecastOutlook = [
   { label: "Friday", short: "Fri", hazard: "High surf", bloomPct: 18 },
   { label: "Saturday", short: "Sat", hazard: "High surf", bloomPct: 20 },
   { label: "Sunday", short: "Sun", hazard: "Moderate", bloomPct: 16 },
-  { label: "Next Monday", short: "+1", hazard: "Low", bloomPct: 11 }
+  { label: "Next Monday", short: "+1", hazard: "Low", bloomPct: 11 },
+  { label: "Next Tuesday", short: "+2", hazard: "Low", bloomPct: 13 },
+  { label: "Next Wednesday", short: "+3", hazard: "Moderate", bloomPct: 19 },
+  { label: "Next Thursday", short: "+4", hazard: "Low", bloomPct: 15 },
+  { label: "Next Friday", short: "+5", hazard: "Moderate", bloomPct: 21 },
+  { label: "Next Saturday", short: "+6", hazard: "Low", bloomPct: 14 },
+  { label: "Next Sunday", short: "+7", hazard: "Low", bloomPct: 12 }
 ];

@@ -1,8 +1,8 @@
 /**
  * ReefPulse — application shell (persistent chrome)
  *
- * Single-row header: brand → main nav → icon shortcuts (Saved, Alerts, Dashboard).
- * `/saved` via bookmark and bell; `/dashboard` via the user icon on the right.
+ * Single-row header: brand → main nav → icon shortcut (Dashboard).
+ * `/dashboard` via the user icon on the right.
  */
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
@@ -14,23 +14,6 @@ const navItems = [
   { to: "/challenges", label: "Challenges", end: true },
   { to: "/community", label: "Community", end: true }
 ];
-
-function IconBookmark() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-    </svg>
-  );
-}
-
-function IconBell() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-    </svg>
-  );
-}
 
 function IconUser() {
   return (
@@ -69,24 +52,6 @@ function AppLayout() {
         </nav>
 
         <div className="top-nav-tools">
-          <NavLink
-            to="/saved"
-            className={({ isActive }) => `top-nav-icon ${isActive ? "is-active" : ""}`}
-            title="Saved places"
-            aria-label="Saved places"
-          >
-            <IconBookmark />
-            <span className="visually-hidden">Saved places</span>
-          </NavLink>
-          <NavLink
-            to="/saved#coastal-alerts"
-            className={({ isActive }) => `top-nav-icon ${isActive ? "is-active" : ""}`}
-            title="Alerts"
-            aria-label="Alerts"
-          >
-            <IconBell />
-            <span className="visually-hidden">Alerts</span>
-          </NavLink>
           <NavLink
             to="/dashboard"
             className={({ isActive }) => `top-nav-icon ${isActive ? "is-active" : ""}`}

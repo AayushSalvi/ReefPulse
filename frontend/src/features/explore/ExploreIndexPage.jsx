@@ -15,7 +15,7 @@ function ExploreIndexPage() {
       <ExploreGoogleMapPanel />
       <p className="ex-index-after-map">
         Use the sidebar to search California beaches or ReefPulse spots. After you set a pin, your latitude and
-        longitude appear in the sidebar with a <strong>See forecast</strong> shortcut to the nearest beach tab.
+        longitude appear in the sidebar with an <strong>open fishdeck</strong> shortcut.
       </p>
     </div>
   );

@@ -1,15 +1,13 @@
 /**
- * ReefPulse — Deep link helper for forecast tab
+ * ReefPulse — Legacy deep link `/explore/:locationId/forecast`
  *
- * Route: `/explore/:locationId/forecast`
- * Behavior: Immediately replaces URL with `/explore/:locationId?tab=forecast` so the
- *           single `ExploreLocationPage` implementation owns all tab state.
+ * Forecast tab was removed; opens the location species-card page.
  */
 import { Navigate, useParams } from "react-router-dom";
 
 function ExploreForecastRedirect() {
   const { locationId } = useParams();
-  return <Navigate to={`/explore/${locationId}?tab=forecast`} replace />;
+  return <Navigate to={`/explore/${locationId}`} replace />;
 }
 
 export default ExploreForecastRedirect;

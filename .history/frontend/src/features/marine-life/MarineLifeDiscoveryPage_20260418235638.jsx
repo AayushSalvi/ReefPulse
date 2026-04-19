@@ -256,7 +256,7 @@ function MarineLifeDiscoveryPage() {
     return communitySightings.slice(0, 4);
   }, [selected, inatPickedTaxon]);
 
-  const habIsLow = Boolean(selected?.habRisk?.toLowerCase()?.includes("low"));
+  const habIsLow = selected?.habRisk?.toLowerCase().includes("low");
 
   const scheduleSuggestClose = () => {
     window.clearTimeout(suggestBlurTimerRef.current);

@@ -55,17 +55,11 @@ function tcgStats(name, index, location) {
   return { hp, encounter, swim };
 }
 
-const CARD_TONE_CYCLE = [
-  { key: "lemon", hex: "#FAFF6C" },
-  { key: "magenta", hex: "#D00296" },
-  { key: "lime", hex: "#D9F274" },
-];
-
 function tcgRarity(index, total) {
-  if (total <= 1) return { label: "★ Rare" };
-  if (index === 0) return { label: "★ Rare" };
-  if (index >= total - 1) return { label: "Common" };
-  return { label: "Uncommon" };
+  if (total <= 1) return { label: "★ Rare", tier: "rare" };
+  if (index === 0) return { label: "★ Rare", tier: "rare" };
+  if (index >= total - 1) return { label: "Common", tier: "common" };
+  return { label: "Uncommon", tier: "uncommon" };
 }
 
 function ExploreLocationPage() {
@@ -114,7 +108,6 @@ function ExploreLocationPage() {
         </p>
         <div className="ex-poke-grid">
           {speciesDeck.map((item, index) => {
-            const tone = CARD_TONE_CYCLE[index % CARD_TONE_CYCLE.length];
             const img = item.profile?.detailImage;
             const hint =
               item.profile?.hint ||
@@ -132,13 +125,10 @@ function ExploreLocationPage() {
               <Link
                 key={item.id}
                 to="/marine-life"
-                className={`poke-card poke-card--tone-${tone.key}`}
+                className={`poke-card poke-card--${rarity.tier}`}
                 aria-label={`${item.name} — open Marine life`}
               >
-                <div
-                  className={`poke-card__shine ${tone.key === "magenta" ? "poke-card__shine--on" : ""}`}
-                  aria-hidden
-                />
+                <div className="poke-card__shine" aria-hidden />
                 <div className="poke-card__frame">
                   <div className="poke-card__top">
                     <span className="poke-card__name">{item.name}</span>
@@ -159,7 +149,10 @@ function ExploreLocationPage() {
                     style={
                       img
                         ? { backgroundImage: `url(${img})` }
-                        : { backgroundColor: tone.hex }
+                        : {
+                            background:
+                              "linear-gradient(160deg, #38bdf8 0%, #0ea5e9 40%, #0369a1 100%)",
+                          }
                     }
                   >
                     {!img ? (

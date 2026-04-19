@@ -272,8 +272,8 @@ function UserDashboardPage() {
         <p className="dash-dash-head__meta">
           <strong>{location.region}</strong> · ~{distanceKm.toFixed(1)} km from{" "}
           {coords.label}
-              {error ? ` · ${error}` : ""}
-            </p>
+          {error ? ` · ${error}` : ""}
+        </p>
         <p className="dash-dash-head__lede">
           General forecasting for{" "}
           <strong>swimming, snorkeling, surfing, and beach days</strong> — not a
@@ -322,7 +322,13 @@ function UserDashboardPage() {
             className="dash-dash-head__btn dash-dash-head__btn--primary"
             to={`/explore/${location.id}`}
           >
-            Open in Explore
+            Map &amp; tabs in Explore
+          </Link>
+          <Link
+            className="dash-dash-head__btn dash-dash-head__btn--ghost"
+            to={`/explore/${location.id}?tab=forecast`}
+          >
+            14-day tab in Explore
           </Link>
         </div>
       </header>
@@ -368,7 +374,7 @@ function UserDashboardPage() {
           </p>
           <div className="dash-vital__spark-wrap">
             <SparklineTemps temps={sparkTemps} />
-              </div>
+          </div>
           <p className="dash-vital__foot dash-vital__foot--dark">
             7-day outlook strip (demo)
           </p>
@@ -469,8 +475,8 @@ function UserDashboardPage() {
             <li>
               <div className="dash-meter__head">
                 <span>Water comfort (swim / snorkel)</span>
-          <strong>{location.waterTempF}°F</strong>
-        </div>
+                <strong>{location.waterTempF}°F</strong>
+              </div>
               <div className="dash-meter__track">
                 <span
                   className="dash-meter__fill dash-meter__fill--water"
@@ -481,8 +487,8 @@ function UserDashboardPage() {
             <li>
               <div className="dash-meter__head">
                 <span>Wave exposure (surf &amp; surge)</span>
-          <strong>{location.waveFt} ft</strong>
-        </div>
+                <strong>{location.waveFt} ft</strong>
+              </div>
               <div className="dash-meter__track">
                 <span
                   className="dash-meter__fill dash-meter__fill--wave"
@@ -493,8 +499,8 @@ function UserDashboardPage() {
             <li>
               <div className="dash-meter__head">
                 <span>Wind chop &amp; drift</span>
-          <strong>{location.windMph} mph</strong>
-        </div>
+                <strong>{location.windMph} mph</strong>
+              </div>
               <div className="dash-meter__track">
                 <span
                   className="dash-meter__fill dash-meter__fill--wind"
@@ -505,14 +511,14 @@ function UserDashboardPage() {
             <li>
               <div className="dash-meter__head">
                 <span>Rain (beach day washout)</span>
-          <strong>{location.rainChancePct}%</strong>
-        </div>
+                <strong>{location.rainChancePct}%</strong>
+              </div>
               <div className="dash-meter__track">
                 <span
                   className="dash-meter__fill dash-meter__fill--rain"
                   style={{ width: `${rainPct}%` }}
                 />
-        </div>
+              </div>
             </li>
           </ul>
           <p className="dash-panel__muted dash-panel__muted--tight">
@@ -542,8 +548,8 @@ function UserDashboardPage() {
               General forward view for <strong>{location.name}</strong>: modeled
               nearshore comfort temperature (°F) for swim / snorkel days,
               stacked with a demo <strong>HAB bloom index</strong> so you can
-              see when water-quality risk rises relative to temperature — demo
-              series shown only on this dashboard.
+              see when water-quality risk rises relative to temperature — same
+              series as {"Explore's"} forecast tab.
             </p>
           </div>
           <ul className="dash-chart-legend" aria-label="Legend">
@@ -581,17 +587,21 @@ function UserDashboardPage() {
                   style={{ height: `${row.habPct}%` }}
                   title={`HAB index ${row.bloomPct}%`}
                 />
-      </div>
+              </div>
               <span className="dash-chart-col__date">{row.short}</span>
-          </div>
-        ))}
-      </div>
+            </div>
+          ))}
+        </div>
         <p className="dash-chart-card__note">
           Read stacked bars as{" "}
           <span style={{ color: TEMP_LEGEND }}>thermal comfort band</span> plus{" "}
           <span style={{ color: "#b5c94a" }}>HAB pressure on top</span> — use
-          with tide, surf, and your activity level.{" "}
-          <Link to={`/explore/${location.id}`}>Species cards for this beach in Explore</Link>.
+          with tide, surf, and your activity level. Same demo outlook in Explore
+          —{" "}
+          <Link to={`/explore/${location.id}?tab=forecast`}>
+            open forecast tab
+          </Link>
+          .
         </p>
       </section>
     </div>

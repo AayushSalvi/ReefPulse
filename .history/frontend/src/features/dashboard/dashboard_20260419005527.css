@@ -27,7 +27,7 @@
   margin: 0 0 0.4rem;
   font-size: clamp(1.5rem, 4vw, 2rem);
   font-weight: 800;
-  color: #ffffff;
+  color: #1b254b;
   letter-spacing: -0.02em;
 }
 
@@ -222,11 +222,7 @@
 }
 
 .dash-vital--safety {
-  background: linear-gradient(
-    145deg,
-    rgba(27, 37, 75, 0.55),
-    rgba(15, 118, 110, 0.45)
-  );
+  background: linear-gradient(145deg, rgba(27, 37, 75, 0.55), rgba(15, 118, 110, 0.45));
   border: 1px solid rgba(223, 255, 79, 0.28);
 }
 
@@ -734,9 +730,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .dash-dash-head__btn {
-    transition:
-      transform 0.18s ease,
-      opacity 0.18s ease;
+    transition: transform 0.18s ease, opacity 0.18s ease;
   }
 
   .dash-dash-head__btn:active {

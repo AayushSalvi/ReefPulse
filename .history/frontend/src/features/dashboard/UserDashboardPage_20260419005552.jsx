@@ -58,11 +58,7 @@ function SafetyGauge({ value, surface = "dark" }) {
         : "#fca5a5";
   const track = isLight ? "#e2e8f0" : "rgba(255,255,255,0.18)";
   return (
-    <svg
-      className={`dash-gauge ${isLight ? "dash-gauge--light" : ""}`}
-      viewBox="0 0 112 64"
-      aria-hidden
-    >
+    <svg className={`dash-gauge ${isLight ? "dash-gauge--light" : ""}`} viewBox="0 0 112 64" aria-hidden>
       <path
         d="M 12 52 A 44 44 0 0 1 100 52"
         fill="none"
@@ -157,9 +153,7 @@ function UserDashboardPage() {
       .catch((err) => {
         if (!cancelled) {
           setFusion(null);
-          setFusionError(
-            err instanceof Error ? err.message : "Safety API unreachable",
-          );
+          setFusionError(err instanceof Error ? err.message : "Safety API unreachable");
         }
       })
       .finally(() => {
@@ -197,12 +191,7 @@ function UserDashboardPage() {
         tPct *= s;
         hPct *= s;
       }
-      return {
-        ...d,
-        tempPct: tPct,
-        habPct: hPct,
-        tempF: Math.round(d.tempF * 10) / 10,
-      };
+      return { ...d, tempPct: tPct, habPct: hPct, tempF: Math.round(d.tempF * 10) / 10 };
     });
   }, [chartSeries]);
 
@@ -212,8 +201,7 @@ function UserDashboardPage() {
   }, [chartSeries]);
 
   const activeFusionFlags = useMemo(() => {
-    if (!fusion?.public_flags || typeof fusion.public_flags !== "object")
-      return [];
+    if (!fusion?.public_flags || typeof fusion.public_flags !== "object") return [];
     return Object.entries(fusion.public_flags).filter(([, on]) => on);
   }, [fusion]);
 
@@ -235,9 +223,7 @@ function UserDashboardPage() {
 
   const { location, distanceKm } = nearestLocation(coords.lat, coords.lng);
   const safetyIndexLive =
-    fusion && typeof fusion.safety_index === "number"
-      ? fusion.safety_index
-      : null;
+    fusion && typeof fusion.safety_index === "number" ? fusion.safety_index : null;
   const safetyIndex = safetyIndexLive ?? location.safetyIndex;
   const locationForSafety = { ...location, safetyIndex };
   const verdict = snorkelRecommendation(locationForSafety);
@@ -245,22 +231,14 @@ function UserDashboardPage() {
   const hasAlerts = location.activeAlerts.length > 0;
   const alertCount = location.activeAlerts.length;
 
-  const waterPct = clamp(
-    ((location.waterTempF - 48) / (78 - 48)) * 100,
-    4,
-    100,
-  );
+  const waterPct = clamp(((location.waterTempF - 48) / (78 - 48)) * 100, 4, 100);
   const wavePct = clamp((location.waveFt / 7) * 100, 4, 100);
   const windPct = clamp((location.windMph / 32) * 100, 4, 100);
   const rainPct = clamp(location.rainChancePct, 0, 100);
 
   return (
     <div className="dash-wrap">
-      <nav
-        className="rp-breadcrumb"
-        aria-label="Breadcrumb"
-        style={{ marginBottom: "1rem" }}
-      >
+      <nav className="rp-breadcrumb" aria-label="Breadcrumb" style={{ marginBottom: "1rem" }}>
         <Link to="/">Home</Link>
         <span className="rp-breadcrumb-sep">/</span>
         <span aria-current="page">Dashboard</span>
@@ -268,70 +246,50 @@ function UserDashboardPage() {
 
       <header className="dash-dash-head">
         <p className="dash-dash-head__kicker">Recreational ocean forecast</p>
-        <h1 className="dash-dash-head__title">General Forecast</h1>
+        <h1 className="dash-dash-head__title">{location.name}</h1>
         <p className="dash-dash-head__meta">
-          <strong>{location.region}</strong> · ~{distanceKm.toFixed(1)} km from{" "}
-          {coords.label}
-              {error ? ` · ${error}` : ""}
-            </p>
+          <strong>{location.region}</strong> · ~{distanceKm.toFixed(1)} km from {coords.label}
+          {error ? ` · ${error}` : ""}
+        </p>
         <p className="dash-dash-head__lede">
-          General forecasting for{" "}
-          <strong>swimming, snorkeling, surfing, and beach days</strong> — not a
-          replacement for lifeguard flags, tide tables, or your own skill
-          assessment.
+          General forecasting for <strong>swimming, snorkeling, surfing, and beach days</strong> — not a replacement for
+          lifeguard flags, tide tables, or your own skill assessment.
         </p>
         {fusionLoading ? (
-          <p
-            className="dash-dash-head__api dash-dash-head__api--pending"
-            role="status"
-          >
+          <p className="dash-dash-head__api dash-dash-head__api--pending" role="status">
             Loading live safety index from the ReefPulse API…
           </p>
         ) : null}
         {fusionError ? (
-          <p
-            className="dash-dash-head__api dash-dash-head__api--warn"
-            role="status"
-          >
-            Safety index fallback: demo values ({fusionError}). Start the
-            backend on port 8000 or set{" "}
+          <p className="dash-dash-head__api dash-dash-head__api--warn" role="status">
+            Safety index fallback: demo values ({fusionError}). Start the backend on port 8000 or set{" "}
             <code className="dash-inline-code">VITE_API_BASE_URL</code>.
           </p>
         ) : null}
         {fusion && !fusionError ? (
-          <p
-            className="dash-dash-head__api dash-dash-head__api--ok"
-            role="status"
-          >
-            Activity safety index is <strong>live</strong> from the API (Model B
-            always; Model A when a checkpoint is configured). Waves, rain, and
-            the 14-day chart below remain demo fixtures for this screen.
+          <p className="dash-dash-head__api dash-dash-head__api--ok" role="status">
+            Activity safety index is <strong>live</strong> from the API (Model B always; Model A when a checkpoint is
+            configured). Waves, rain, and the 14-day chart below remain demo fixtures for this screen.
           </p>
         ) : null}
-        <ul
-          className="dash-dash-head__acts"
-          aria-label="Activity coverage in this demo"
-        >
+        <ul className="dash-dash-head__acts" aria-label="Activity coverage in this demo">
           <li>Swim / wade</li>
           <li>Snorkel</li>
           <li>Surf</li>
           <li>Beach &amp; tidepool</li>
         </ul>
         <div className="dash-dash-head__links">
-          <Link
-            className="dash-dash-head__btn dash-dash-head__btn--primary"
-            to={`/explore/${location.id}`}
-          >
-            Open in Explore
+          <Link className="dash-dash-head__btn dash-dash-head__btn--primary" to={`/explore/${location.id}`}>
+            Map &amp; tabs in Explore
+          </Link>
+          <Link className="dash-dash-head__btn dash-dash-head__btn--ghost" to={`/explore/${location.id}?tab=forecast`}>
+            14-day tab in Explore
           </Link>
         </div>
       </header>
 
       {/* —— Vitals strip (recreation-oriented snapshot) —— */}
-      <section
-        className="dash-vitals"
-        aria-label="Recreation forecast snapshot"
-      >
+      <section className="dash-vitals" aria-label="Recreation forecast snapshot">
         <article className="dash-vital dash-vital--safety">
           <p className="dash-vital__label">Activity safety index</p>
           <div className="dash-vital__hero">
@@ -344,21 +302,13 @@ function UserDashboardPage() {
               : "0–100 demo · in-water comfort and hazard blend"}
           </p>
         </article>
-        <article
-          className={`dash-vital dash-vital--alert ${hasAlerts ? "dash-vital--alert-warn" : ""}`}
-        >
+        <article className={`dash-vital dash-vital--alert ${hasAlerts ? "dash-vital--alert-warn" : ""}`}>
           <p className="dash-vital__label">Ocean &amp; HAB alerts</p>
           <p className="dash-vital__big">
             <span className="dash-vital__accent">{alertCount}</span>
-            <span className="dash-vital__suffix">
-              {alertCount === 1 ? " advisory" : " advisories"}
-            </span>
+            <span className="dash-vital__suffix">{alertCount === 1 ? " advisory" : " advisories"}</span>
           </p>
-          <p className="dash-vital__foot">
-            {hasAlerts
-              ? "Check before swim or snorkel"
-              : "No demo closures this week"}
-          </p>
+          <p className="dash-vital__foot">{hasAlerts ? "Check before swim or snorkel" : "No demo closures this week"}</p>
         </article>
         <article className="dash-vital dash-vital--temp">
           <p className="dash-vital__label">Sea-surface comfort (°F)</p>
@@ -368,10 +318,8 @@ function UserDashboardPage() {
           </p>
           <div className="dash-vital__spark-wrap">
             <SparklineTemps temps={sparkTemps} />
-              </div>
-          <p className="dash-vital__foot dash-vital__foot--dark">
-            7-day outlook strip (demo)
-          </p>
+          </div>
+          <p className="dash-vital__foot dash-vital__foot--dark">7-day outlook strip (demo)</p>
         </article>
         <article className="dash-vital dash-vital--surf">
           <p className="dash-vital__label">Surf &amp; wind chop</p>
@@ -386,24 +334,15 @@ function UserDashboardPage() {
             </div>
           </div>
           <div className="dash-vital__microbars" aria-hidden>
-            <span
-              style={{ width: `${wavePct}%` }}
-              className="dash-vital__microbar dash-vital__microbar--wave"
-            />
-            <span
-              style={{ width: `${windPct}%` }}
-              className="dash-vital__microbar dash-vital__microbar--wind"
-            />
+            <span style={{ width: `${wavePct}%` }} className="dash-vital__microbar dash-vital__microbar--wave" />
+            <span style={{ width: `${windPct}%` }} className="dash-vital__microbar dash-vital__microbar--wind" />
           </div>
         </article>
       </section>
 
       <div className="dash-main-split">
         {/* —— Safety + verdict —— */}
-        <section
-          className="dash-panel dash-panel--accent"
-          aria-labelledby="dash-safety-title"
-        >
+        <section className="dash-panel dash-panel--accent" aria-labelledby="dash-safety-title">
           <h2 id="dash-safety-title" className="dash-panel__title">
             Go / no-go for in-water play
           </h2>
@@ -419,34 +358,19 @@ function UserDashboardPage() {
             </div>
             {fusion?.beach_condition ? (
               <p className="dash-beach-band">
-                <span className="dash-beach-band__label">
-                  Beach condition (API)
-                </span>
-                <span
-                  className={`dash-beach-band__pill dash-beach-band__pill--${fusion.beach_condition}`}
-                >
+                <span className="dash-beach-band__label">Beach condition (API)</span>
+                <span className={`dash-beach-band__pill dash-beach-band__pill--${fusion.beach_condition}`}>
                   {fusion.beach_condition.replace(/-/g, " ")}
                 </span>
               </p>
             ) : null}
-            <div
-              className={`dash-verdict dash-verdict--${verdict.tone} dash-verdict--block`}
-            >
-              {verdict.label}
-            </div>
-            <p className="dash-panel__muted dash-panel__muted--emph">
-              {outlookLine}
-            </p>
+            <div className={`dash-verdict dash-verdict--${verdict.tone} dash-verdict--block`}>{verdict.label}</div>
+            <p className="dash-panel__muted dash-panel__muted--emph">{outlookLine}</p>
             {fusion?.narrative ? (
-              <p className="dash-panel__muted dash-panel__muted--emph">
-                {fusion.narrative}
-              </p>
+              <p className="dash-panel__muted dash-panel__muted--emph">{fusion.narrative}</p>
             ) : null}
             {activeFusionFlags.length ? (
-              <ul
-                className="dash-fusion-flags"
-                aria-label="Ocean stress flags from API"
-              >
+              <ul className="dash-fusion-flags" aria-label="Ocean stress flags from API">
                 {activeFusionFlags.map(([key]) => (
                   <li key={key}>{key.replace(/_/g, " ")}</li>
                 ))}
@@ -469,59 +393,44 @@ function UserDashboardPage() {
             <li>
               <div className="dash-meter__head">
                 <span>Water comfort (swim / snorkel)</span>
-          <strong>{location.waterTempF}°F</strong>
-        </div>
+                <strong>{location.waterTempF}°F</strong>
+              </div>
               <div className="dash-meter__track">
-                <span
-                  className="dash-meter__fill dash-meter__fill--water"
-                  style={{ width: `${waterPct}%` }}
-                />
+                <span className="dash-meter__fill dash-meter__fill--water" style={{ width: `${waterPct}%` }} />
               </div>
             </li>
             <li>
               <div className="dash-meter__head">
                 <span>Wave exposure (surf &amp; surge)</span>
-          <strong>{location.waveFt} ft</strong>
-        </div>
+                <strong>{location.waveFt} ft</strong>
+              </div>
               <div className="dash-meter__track">
-                <span
-                  className="dash-meter__fill dash-meter__fill--wave"
-                  style={{ width: `${wavePct}%` }}
-                />
+                <span className="dash-meter__fill dash-meter__fill--wave" style={{ width: `${wavePct}%` }} />
               </div>
             </li>
             <li>
               <div className="dash-meter__head">
                 <span>Wind chop &amp; drift</span>
-          <strong>{location.windMph} mph</strong>
-        </div>
+                <strong>{location.windMph} mph</strong>
+              </div>
               <div className="dash-meter__track">
-                <span
-                  className="dash-meter__fill dash-meter__fill--wind"
-                  style={{ width: `${windPct}%` }}
-                />
+                <span className="dash-meter__fill dash-meter__fill--wind" style={{ width: `${windPct}%` }} />
               </div>
             </li>
             <li>
               <div className="dash-meter__head">
                 <span>Rain (beach day washout)</span>
-          <strong>{location.rainChancePct}%</strong>
-        </div>
+                <strong>{location.rainChancePct}%</strong>
+              </div>
               <div className="dash-meter__track">
-                <span
-                  className="dash-meter__fill dash-meter__fill--rain"
-                  style={{ width: `${rainPct}%` }}
-                />
-        </div>
+                <span className="dash-meter__fill dash-meter__fill--rain" style={{ width: `${rainPct}%` }} />
+              </div>
             </li>
           </ul>
           <p className="dash-panel__muted dash-panel__muted--tight">
-            <strong>Algal / HAB (recreation angle):</strong>{" "}
-            {location.algalRisk} — higher concern days suggest limiting
+            <strong>Algal / HAB (recreation angle):</strong> {location.algalRisk} — higher concern days suggest limiting
             face-in-water time and rinsing after swims.
-            {location.hazardBadges?.length
-              ? ` · Flags / hazards: ${location.hazardBadges.join(", ")}`
-              : ""}
+            {location.hazardBadges?.length ? ` · Flags / hazards: ${location.hazardBadges.join(", ")}` : ""}
           </p>
           {hasAlerts ? (
             <p className="dash-panel__alertbox" role="status">
@@ -539,26 +448,18 @@ function UserDashboardPage() {
               14-day outlook for ocean recreation
             </h2>
             <p className="dash-chart-card__sub">
-              General forward view for <strong>{location.name}</strong>: modeled
-              nearshore comfort temperature (°F) for swim / snorkel days,
-              stacked with a demo <strong>HAB bloom index</strong> so you can
-              see when water-quality risk rises relative to temperature — demo
-              series shown only on this dashboard.
+              General forward view for <strong>{location.name}</strong>: modeled nearshore comfort temperature (°F) for
+              swim / snorkel days, stacked with a demo <strong>HAB bloom index</strong> so you can see when water-quality
+              risk rises relative to temperature — same series as {"Explore's"} forecast tab.
             </p>
           </div>
           <ul className="dash-chart-legend" aria-label="Legend">
             <li>
-              <span
-                className="dash-chart-legend__swatch"
-                style={{ background: TEMP_LEGEND }}
-              />
+              <span className="dash-chart-legend__swatch" style={{ background: TEMP_LEGEND }} />
               Comfort temp
             </li>
             <li>
-              <span
-                className="dash-chart-legend__swatch dash-chart-legend__swatch--hab"
-                style={{ background: HAB_LEGEND }}
-              />
+              <span className="dash-chart-legend__swatch dash-chart-legend__swatch--hab" style={{ background: HAB_LEGEND }} />
               HAB index
             </li>
           </ul>
@@ -581,17 +482,15 @@ function UserDashboardPage() {
                   style={{ height: `${row.habPct}%` }}
                   title={`HAB index ${row.bloomPct}%`}
                 />
-      </div>
+              </div>
               <span className="dash-chart-col__date">{row.short}</span>
-          </div>
-        ))}
-      </div>
+            </div>
+          ))}
+        </div>
         <p className="dash-chart-card__note">
-          Read stacked bars as{" "}
-          <span style={{ color: TEMP_LEGEND }}>thermal comfort band</span> plus{" "}
-          <span style={{ color: "#b5c94a" }}>HAB pressure on top</span> — use
-          with tide, surf, and your activity level.{" "}
-          <Link to={`/explore/${location.id}`}>Species cards for this beach in Explore</Link>.
+          Read stacked bars as <span style={{ color: TEMP_LEGEND }}>thermal comfort band</span> plus{" "}
+          <span style={{ color: "#b5c94a" }}>HAB pressure on top</span> — use with tide, surf, and your activity level.
+          Same demo outlook in Explore — <Link to={`/explore/${location.id}?tab=forecast`}>open forecast tab</Link>.
         </p>
       </section>
     </div>

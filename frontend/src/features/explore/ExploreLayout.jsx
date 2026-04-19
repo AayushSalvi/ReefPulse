@@ -50,8 +50,6 @@ function ExploreLayout() {
   const match = pathname.match(/^\/explore\/([^/]+)$/);
   const locationId = match ? match[1] : null;
   const loc = locationId ? findLocation(locationId) : null;
-  const tab = loc ? sp.get("tab") || "overview" : null;
-
   const qFromUrl = sp.get("q") || "";
   const [query, setQuery] = useState(qFromUrl);
   const [safeOnly, setSafeOnly] = useState(false);
@@ -199,11 +197,6 @@ function ExploreLayout() {
   const mapHasCoords = Number.isFinite(mapLat) && Number.isFinite(mapLng);
   const nearestForForecast =
     !locationId && mapHasCoords ? nearestLocation(mapLat, mapLng) : null;
-  const tabLabel =
-    tab && tab !== "overview"
-      ? tab.charAt(0).toUpperCase() + tab.slice(1)
-      : null;
-
   return (
     <ExploreMapsApiProvider>
       <div className="wf-page ex-app">
@@ -216,7 +209,6 @@ function ExploreLayout() {
               <span className="rp-breadcrumb-sep">/</span>
               <span aria-current="page">
                 {loc.name}
-                {tabLabel ? ` · ${tabLabel}` : ""}
               </span>
             </>
           )}
@@ -232,8 +224,8 @@ function ExploreLayout() {
           <h1>{loc ? loc.name : "Explore locations"}</h1>
           <p>
             {loc
-              ? `Overview, past, forecast, and community for this beach — your main planning surface.`
-              : "Search beaches, coves, and reefs; filter by activity; open a place for tabs and local posts."}
+              ? `Collectible-style species cards for this beach.`
+              : "Search beaches, coves, and reefs; filter by activity; open a place for species cards."}
           </p>
         </div>
 
@@ -418,13 +410,13 @@ function ExploreLayout() {
                 {nearestForForecast && (
                   <div className="ex-sidebar-forecast-wrap">
                     <Link
-                      to={`/explore/${nearestForForecast.location.id}?tab=forecast`}
+                      to={`/explore/${nearestForForecast.location.id}`}
                       className="ex-sidebar-forecast-btn"
                     >
-                      See forecast
+                      open fishdeck
                     </Link>
                     <p className="ex-sidebar-forecast-note">
-                      For this pin we open the forecast tab for the nearest ReefPulse beach:{" "}
+                      For this pin, open fishdeck for the nearest ReefPulse beach:{" "}
                       <strong>{nearestForForecast.location.name}</strong> (~
                       {nearestForForecast.distanceKm.toFixed(1)} km away).
                     </p>
@@ -440,7 +432,7 @@ function ExploreLayout() {
             </div>
           </aside>
 
-          {/* —— Main: child route (index map / location tabs) —— */}
+          {/* —— Main: child route (index map / location cards) —— */}
           <div className="ex-outlet">
             <Outlet />
           </div>

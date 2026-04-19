@@ -3,12 +3,11 @@
  *
  * Folder map (see `src/features/`):
  *   features/home/          → `/` marketing / home dashboard
- *   features/dashboard/     → `/dashboard` personalized “closest beach” view
- *   features/explore/       → `/explore`, `/explore/:locationId` location workspace + tabs
+ *   features/dashboard/     → `/dashboard` recreational ocean-activity forecast (nearest beach)
+ *   features/explore/       → `/explore`, `/explore/:locationId` (species cards)
  *   features/marine-life/     → `/marine-life` species-first discovery
  *   features/community/     → `/community` posts & feed
  *   features/challenges/    → `/challenges` goals, badges, trophies
- *   features/saved/         → `/saved` alerts & saved places
  *   features/legacy/        → `/location/:id` redirects to Explore
  *   features/standalone/    → NOT routed here; optional admin / forecast UIs for future routes
  *
@@ -28,7 +27,6 @@ import { ExploreMapsApiProvider } from "./features/explore/ExploreMapsApiContext
 import HomeDashboardPage from "./features/home/HomeDashboardPage";
 import LegacyLocationRedirect from "./features/legacy/LegacyLocationRedirect";
 import MarineLifeDiscoveryPage from "./features/marine-life/MarineLifeDiscoveryPage";
-import SavedPlacesPage from "./features/saved/SavedPlacesPage";
 import UserDashboardPage from "./features/dashboard/UserDashboardPage";
 
 function App() {
@@ -59,7 +57,7 @@ function App() {
         <Route path="/dashboard" element={<UserDashboardPage />} />
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/challenges" element={<ChallengesPage />} />
-        <Route path="/saved" element={<SavedPlacesPage />} />
+        <Route path="/saved" element={<Navigate to="/explore" replace />} />
 
         {/* —— Back-compat deep links —— */}
         <Route path="/location/:locationId" element={<LegacyLocationRedirect />} />
