@@ -412,7 +412,7 @@ function ExploreLayout() {
                 {nearestForForecast && (
                   <div className="ex-sidebar-forecast-wrap">
                     <Link
-                      to={`/explore/${nearestForForecast.location.id}?fishdeck=1`}
+                      to={`/explore/${nearestForForecast.location.id}`}
                       className="ex-sidebar-forecast-btn"
                     >
                       open fishdeck

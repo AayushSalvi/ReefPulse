@@ -3,10 +3,23 @@
  *
  * Route: `/community`  ·  Styles: `./community.css`, `../explore/workflow.css`
  */
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  createCommunityComment,
+  createCommunityPost,
+  fetchCommunityComments,
+  fetchCommunityPosts,
+  likeCommunityPost,
+  presignCommunityMedia,
+  saveCommunityPost,
+  unlikeCommunityPost,
+  unsaveCommunityPost,
+  uploadFileToPresignedUrl,
+} from "../../api/community";
+import { useAuth } from "../../auth/AuthContext";
 import { getChallengeIconId } from "../../data/challengesData";
-import { communitySightingsFiltered, locations } from "../../data/mockData";
+import { locations } from "../../data/mockData";
 import { ChallengeCardIcon } from "../challenges/challengeIcons";
 import "../explore/workflow.css";
 import "./community.css";
@@ -42,6 +55,53 @@ function formatLikes(n) {
   return String(n);
 }
 
+function toRelativeTime(iso) {
+  if (!iso) return "";
+  const ts = Date.parse(iso);
+  if (Number.isNaN(ts)) return "";
+  const diff = Date.now() - ts;
+  const s = Math.max(0, Math.floor(diff / 1000));
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `${d}d`;
+  const mo = Math.floor(d / 30);
+  if (mo < 12) return `${mo}mo`;
+  return `${Math.floor(mo / 12)}y`;
+}
+
+function normalizeFeedPost(p) {
+  return {
+    id: p.id,
+    species: p.species,
+    username: p.username,
+    author: p.author,
+    locationId: p.location_id,
+    locationName: p.location_name,
+    text: p.text,
+    visibility: p.visibility,
+    tips: p.tips || [],
+    tags: p.tags || [],
+    likes: p.likes ?? 0,
+    commentsCount: p.comments_count ?? 0,
+    imageUrl: p.image_url || null,
+    challengeCompletion: p.challenge_completion
+      ? {
+          challengeId: p.challenge_completion.challenge_id,
+          title: p.challenge_completion.title,
+          badgeName: p.challenge_completion.badge_name,
+        }
+      : null,
+    likedByYou: Boolean(p.liked_by_you),
+    savedByYou: Boolean(p.saved_by_you),
+    createdAt: p.created_at,
+    time: toRelativeTime(p.created_at),
+  };
+}
+
 function IconHeart() {
   return (
     <svg className="comm-post-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -69,7 +129,7 @@ function IconShare() {
   );
 }
 
-function FeedPost({ sighting: s }) {
+function FeedPost({ sighting: s, onLikeToggle, onSaveToggle, onCommentCreate }) {
   const [imgFailed, setImgFailed] = useState(false);
   const handle = s.username || s.author.replace(/\s+/g, "_").toLowerCase();
   const displaySpecies = s.species;
@@ -125,13 +185,28 @@ function FeedPost({ sighting: s }) {
 
         <div className="comm-post__toolbar">
           <div className="comm-post__toolbar-left">
-            <button type="button" className="comm-post__iconbtn" aria-label="Like (demo)">
+            <button
+              type="button"
+              className={`comm-post__iconbtn ${s.likedByYou ? "is-on" : ""}`}
+              aria-label={s.likedByYou ? "Unlike" : "Like"}
+              onClick={() => onLikeToggle(s)}
+            >
               <IconHeart />
             </button>
-            <button type="button" className="comm-post__iconbtn" aria-label={`Comments${typeof s.commentsCount === "number" ? `, ${s.commentsCount}` : ""} (demo)`}>
+            <button
+              type="button"
+              className="comm-post__iconbtn"
+              aria-label={`Add comment${typeof s.commentsCount === "number" ? `, ${s.commentsCount}` : ""}`}
+              onClick={() => onCommentCreate(s)}
+            >
               <IconBubble count={s.commentsCount} />
             </button>
-            <button type="button" className="comm-post__iconbtn" aria-label="Share (demo)">
+            <button
+              type="button"
+              className={`comm-post__iconbtn ${s.savedByYou ? "is-on" : ""}`}
+              aria-label={s.savedByYou ? "Unsave post" : "Save post"}
+              onClick={() => onSaveToggle(s)}
+            >
               <IconShare />
             </button>
           </div>
@@ -160,7 +235,7 @@ function FeedPost({ sighting: s }) {
             </>
           ) : null}
           <div className="comm-post__tags">
-            {s.tags.map((t) => (
+            {(s.tags || []).map((t) => (
               <span key={t} className="comm-post__tag">
                 #{t}
               </span>
@@ -241,16 +316,20 @@ function ComposerBlock({
   visibility,
   setVisibility,
   photoName,
+  setPhotoFile,
   setPhotoName,
   aiNote,
-  setAiNote
+  setAiNote,
+  onSubmit,
+  postPending,
+  postStatus
 }) {
   return (
     <section className="comm-panel comm-panel--compose" aria-label="Create post">
       <div className="comm-panel-head">
         <span className="comm-panel-kicker">Share a sighting</span>
         <h2 className="comm-panel-title">New post</h2>
-        <p className="comm-panel-lead">Add a photo, beach, conditions, and tips — demo form clears on submit.</p>
+        <p className="comm-panel-lead">Add a photo, beach, conditions, and tips — publishes to backend feed.</p>
       </div>
 
       <div className="comm-compose-split comm-compose-split--sidebar">
@@ -263,7 +342,11 @@ function ComposerBlock({
                 type="file"
                 accept="image/*"
                 className="comm-input-file"
-                onChange={(e) => setPhotoName(e.target.files?.[0]?.name || "")}
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setPhotoFile(file);
+                  setPhotoName(file?.name || "");
+                }}
               />
               {photoName ? <span className="comm-file-name">{photoName}</span> : null}
             </label>
@@ -344,25 +427,19 @@ function ComposerBlock({
         <button
           type="button"
           className="comm-btn comm-btn--primary"
-          onClick={() => {
-            setDraft("");
-            setSpecies("");
-            setLocationId("");
-            setWhenLocal("");
-            setVisibility("");
-            setPhotoName("");
-            setAiNote("");
-          }}
+          onClick={onSubmit}
+          disabled={postPending}
         >
-          Post (demo — clears form)
+          {postPending ? "Posting..." : "Post"}
         </button>
-        <p className="comm-compose-hint">In production this would publish to the feed and maps.</p>
+        <p className="comm-compose-hint">{postStatus || "Posts publish to /api/v1/community/posts."}</p>
       </div>
     </section>
   );
 }
 
 function CommunityPage() {
+  const { token } = useAuth();
   const [filter, setFilter] = useState("all");
   const [draft, setDraft] = useState("");
   const [species, setSpecies] = useState("");
@@ -370,21 +447,187 @@ function CommunityPage() {
   const [whenLocal, setWhenLocal] = useState("");
   const [visibility, setVisibility] = useState("");
   const [photoName, setPhotoName] = useState("");
+  const [photoFile, setPhotoFile] = useState(null);
   const [speciesFilter, setSpeciesFilter] = useState("");
   const [feedLocation, setFeedLocation] = useState("");
   const [feedSort, setFeedSort] = useState("recent");
   const [aiNote, setAiNote] = useState("");
+  const [feed, setFeed] = useState([]);
+  const [feedLoading, setFeedLoading] = useState(true);
+  const [feedError, setFeedError] = useState("");
+  const [postPending, setPostPending] = useState(false);
+  const [postStatus, setPostStatus] = useState("");
+  const [actionStatus, setActionStatus] = useState("");
 
-  const feed = useMemo(
-    () =>
-      communitySightingsFiltered({
-        tag: filter,
-        speciesQuery: speciesFilter,
-        locationId: feedLocation || null,
-        feedSort
-      }),
-    [filter, speciesFilter, feedLocation, feedSort]
-  );
+  const loadFeed = async () => {
+    setFeedLoading(true);
+    setFeedError("");
+    try {
+      const data = await fetchCommunityPosts(
+        {
+          tag: filter === "all" ? undefined : filter,
+          location_id: feedLocation || undefined,
+          species_query: speciesFilter || undefined,
+          sort: feedSort,
+          limit: 50,
+        },
+        token,
+      );
+      setFeed((data.posts || []).map(normalizeFeedPost));
+    } catch (err) {
+      setFeed([]);
+      setFeedError(err instanceof Error ? err.message : "Failed to load feed");
+    } finally {
+      setFeedLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    loadFeed().catch(() => {
+      // handled in loadFeed
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [filter, speciesFilter, feedLocation, feedSort, token]);
+
+  const handleSubmit = async () => {
+    setPostStatus("");
+    const picked = locations.find((l) => l.id === locationId);
+    if (!picked) {
+      setPostStatus("Pick a beach before posting.");
+      return;
+    }
+    const text = draft.trim();
+    if (!text) {
+      setPostStatus("Add a caption before posting.");
+      return;
+    }
+    setPostPending(true);
+    try {
+      let imageS3Key = null;
+      if (photoFile) {
+        try {
+          const presign = await presignCommunityMedia(photoFile, token);
+          await uploadFileToPresignedUrl(
+            presign.upload_url,
+            photoFile,
+            presign.headers || {},
+          );
+          imageS3Key = presign.object_key;
+        } catch (uploadErr) {
+          setPostStatus(
+            uploadErr instanceof Error
+              ? `Photo upload failed (${uploadErr.message}). Posting without photo.`
+              : "Photo upload failed. Posting without photo.",
+          );
+        }
+      }
+
+      const created = await createCommunityPost(
+        {
+          species: species.trim() || "Unconfirmed species",
+          location_id: picked.id,
+          location_name: picked.name,
+          text,
+          visibility: visibility || null,
+          tips: [],
+          tags: ["snorkel"],
+          image_url: null,
+          image_s3_key: imageS3Key,
+          challenge_id: null,
+        },
+        token,
+      );
+      setFeed((prev) => [normalizeFeedPost(created), ...prev]);
+      setDraft("");
+      setSpecies("");
+      setLocationId("");
+      setWhenLocal("");
+      setVisibility("");
+      setPhotoName("");
+      setPhotoFile(null);
+      setAiNote("");
+      setPostStatus("Posted to community feed.");
+    } catch (err) {
+      setPostStatus(err instanceof Error ? `Post failed: ${err.message}` : "Post failed.");
+    } finally {
+      setPostPending(false);
+    }
+  };
+
+  const handleLikeToggle = async (post) => {
+    try {
+      const out = post.likedByYou
+        ? await unlikeCommunityPost(post.id, token)
+        : await likeCommunityPost(post.id, token);
+      setFeed((prev) =>
+        prev.map((p) =>
+          p.id === post.id
+            ? {
+                ...p,
+                likes: out.likes,
+                likedByYou: out.liked_by_you,
+              }
+            : p,
+        ),
+      );
+    } catch (err) {
+      setActionStatus(
+        err instanceof Error ? `Like action failed: ${err.message}` : "Like action failed.",
+      );
+    }
+  };
+
+  const handleSaveToggle = async (post) => {
+    try {
+      if (post.savedByYou) {
+        await unsaveCommunityPost(post.id, token);
+      } else {
+        await saveCommunityPost(post.id, token);
+      }
+      setFeed((prev) =>
+        prev.map((p) =>
+          p.id === post.id
+            ? {
+                ...p,
+                savedByYou: !post.savedByYou,
+              }
+            : p,
+        ),
+      );
+    } catch (err) {
+      setActionStatus(
+        err instanceof Error ? `Save action failed: ${err.message}` : "Save action failed.",
+      );
+    }
+  };
+
+  const handleCommentCreate = async (post) => {
+    const text = window.prompt("Add a comment:");
+    if (!text || !text.trim()) return;
+    try {
+      await createCommunityComment(post.id, text.trim(), token);
+      const comments = await fetchCommunityComments(post.id, token);
+      setFeed((prev) =>
+        prev.map((p) =>
+          p.id === post.id
+            ? {
+                ...p,
+                commentsCount: comments?.total ?? p.commentsCount + 1,
+              }
+            : p,
+        ),
+      );
+      setActionStatus("Comment posted.");
+    } catch (err) {
+      setActionStatus(
+        err instanceof Error ? `Comment failed: ${err.message}` : "Comment failed.",
+      );
+    }
+  };
 
   const filterProps = {
     filter,
@@ -409,9 +652,13 @@ function CommunityPage() {
     visibility,
     setVisibility,
     photoName,
+    setPhotoFile,
     setPhotoName,
     aiNote,
-    setAiNote
+    setAiNote,
+    onSubmit: handleSubmit,
+    postPending,
+    postStatus,
   };
 
   return (
@@ -431,6 +678,11 @@ function CommunityPage() {
           </Link>{" "}
           and your badge can show up here.
         </p>
+        {actionStatus ? (
+          <p className="comm-ai-note" role="status" style={{ marginTop: "0.6rem" }}>
+            {actionStatus}
+          </p>
+        ) : null}
       </header>
 
       <div className="comm-desktop-grid">
@@ -452,13 +704,30 @@ function CommunityPage() {
           </div>
 
           <section className="comm-feed" aria-label="Sightings from the community">
-            {feed.length === 0 ? (
+            {feedLoading ? (
+              <div className="comm-empty">
+                <p className="comm-empty-title">Loading posts...</p>
+              </div>
+            ) : feedError ? (
+              <div className="comm-empty">
+                <p className="comm-empty-title">Could not load posts</p>
+                <p className="comm-empty-text">{feedError}</p>
+              </div>
+            ) : feed.length === 0 ? (
               <div className="comm-empty">
                 <p className="comm-empty-title">No posts match these filters</p>
                 <p className="comm-empty-text">Try another tag, clear the search, or pick a different beach.</p>
               </div>
             ) : (
-              feed.map((s) => <FeedPost key={s.id} sighting={s} />)
+              feed.map((s) => (
+                <FeedPost
+                  key={s.id}
+                  sighting={s}
+                  onLikeToggle={handleLikeToggle}
+                  onSaveToggle={handleSaveToggle}
+                  onCommentCreate={handleCommentCreate}
+                />
+              ))
             )}
           </section>
 

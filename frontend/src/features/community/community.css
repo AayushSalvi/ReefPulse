@@ -541,6 +541,11 @@
   background: rgba(27, 37, 75, 0.06);
 }
 
+.comm-post__iconbtn.is-on {
+  background: rgba(223, 255, 79, 0.22);
+  color: #0f766e;
+}
+
 .comm-post__iconbtn:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px rgba(223, 255, 79, 0.45);
